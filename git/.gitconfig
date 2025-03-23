@@ -1,0 +1,141 @@
+[user]
+    # 这些值需要在安装时替换
+    name = Your Name
+    email = your.email@example.com
+
+[core]
+    editor = vim
+    excludesfile = ~/.gitignore_global
+    autocrlf = input
+    safecrlf = true
+    quotepath = false
+    # 启用长路径支持（Windows）
+    longpaths = true
+
+[init]
+    defaultBranch = main
+
+[color]
+    ui = auto
+    status = auto
+    branch = auto
+    diff = auto
+
+[pull]
+    rebase = false
+
+[push]
+    default = current
+    # 自动设置远程分支的上游
+    autoSetupRemote = true
+
+[merge]
+    tool = vscode
+    # 在合并提交信息中包含分支名
+    branchDesc = true
+    # 显示冲突标记
+    conflictStyle = diff3
+
+[mergetool "vscode"]
+    cmd = code --wait $MERGED
+    trustExitCode = true
+
+[diff]
+    tool = vscode
+    # 显示移动的文件
+    renames = true
+    # 检测复制的文件
+    copies = true
+    # 在二进制文件中显示文本差异
+    binary = true
+    # 显示函数上下文
+    context = 3
+
+[difftool "vscode"]
+    cmd = code --wait --diff $LOCAL $REMOTE
+
+[alias]
+    # 基本命令简写
+    st = status
+    ci = commit
+    co = checkout
+    br = branch
+    df = diff
+    dc = diff --cached
+    lg = log --oneline
+    lp = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+    
+    # 分支操作
+    nb = checkout -b
+    cb = !git branch | grep -v '^*' | fzf | xargs git checkout
+    db = branch -d
+    
+    # 提交相关
+    amend = commit --amend
+    undo = reset HEAD~1
+    unstage = reset HEAD --
+    
+    # 暂存操作
+    staged = diff --cached
+    both = diff HEAD
+    
+    # 日志查看
+    last = log -1 HEAD --stat
+    history = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+    
+    # 工作流程
+    done = !git push origin HEAD
+    sync = !git pull origin $(git rev-parse --abbrev-ref HEAD)
+    
+    # 清理操作
+    cleanup = !git remote prune origin && git gc && git clean -dfx && git stash clear
+    
+    # 查看配置
+    aliases = !git config --get-regexp 'alias.*' | colrm 1 6 | sed 's/[ ]/ = /'
+    
+    # 其他实用命令
+    tags = tag -l
+    branches = branch -a
+    remotes = remote -v
+    contributors = shortlog --summary --numbered
+    filehistory = log --follow -p
+    
+    # 查找
+    find = !git ls-files | grep -i
+    grep = grep -Ii
+    
+    # 储藏
+    save = !git stash save "$(date +%F_%T)"
+    pop = stash pop
+    
+    # 合并
+    mf = merge --no-ff
+    squash = merge --squash
+
+[credential]
+    # 凭据缓存（Windows）
+    helper = wincred
+    # macOS 使用 osxkeychain
+    # helper = osxkeychain
+    # Linux 使用 cache
+    # helper = cache --timeout=3600
+
+[filter "lfs"]
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
+
+[help]
+    # 自动纠正命令
+    autocorrect = 1
+
+[url "https://github.com/"]
+    insteadOf = gh:
+
+[url "https://gitlab.com/"]
+    insteadOf = gl:
+
+[fetch]
+    # 自动删除已不存在的远程分支的本地引用
+    prune = true

@@ -1,0 +1,113 @@
+# 全局设置
+Host *
+    # 使用SSH协议版本2
+    Protocol 2
+    # 保持连接活跃
+    ServerAliveInterval 60
+    ServerAliveCountMax 10
+    # 启用连接复用
+    ControlMaster auto
+    ControlPath ~/.ssh/control/%r@%h:%p
+    ControlPersist 1h
+    # 密钥认证
+    PreferredAuthentications publickey,keyboard-interactive,password
+    # 启用压缩
+    Compression yes
+    # 安全选项
+    HashKnownHosts yes
+    StrictHostKeyChecking ask
+    VerifyHostKeyDNS yes
+    # 转发设置
+    ForwardAgent no
+    ForwardX11 no
+
+# GitHub配置示例
+Host github.com
+    HostName github.github.com
+    User git
+    IdentityFile ~/.ssh/github
+    AddKeysToAgent yes
+    UseKeychain yes  # macOS特定
+
+# GitLab配置示例
+Host gitlab.com
+    HostName gitlab.com
+    User git
+    IdentityFile ~/.ssh/gitlab
+    PreferredAuthentications publickey
+
+# 开发服务器示例
+Host dev
+    HostName dev.example.com
+    User username
+    Port 22
+    IdentityFile ~/.ssh/dev_server
+    # 本地端口转发示例
+    LocalForward 3000 localhost:3000
+    # 保持连接活跃
+    ServerAliveInterval 60
+
+# 生产服务器示例
+Host prod
+    HostName prod.example.com
+    User username
+    Port 22
+    IdentityFile ~/.ssh/prod_server
+    # 禁用密码认证
+    PasswordAuthentication no
+    # 增加安全性
+    PermitLocalCommand no
+
+# 跳板机配置示例
+Host jumphost
+    HostName jump.example.com
+    User jump_user
+    IdentityFile ~/.ssh/jump_host
+    Port 22
+
+# 通过跳板机访问内部服务器示例
+Host internal
+    HostName internal.example.com
+    User internal_user
+    IdentityFile ~/.ssh/internal
+    ProxyCommand ssh jumphost -W %h:%p
+    # 保持连接活跃
+    ServerAliveInterval 30
+
+# AWS EC2实例示例
+Host aws
+    HostName ec2-xx-xx-xx-xx.compute-1.amazonaws.com
+    User ec2-user
+    IdentityFile ~/.ssh/aws.pem
+    # 禁用主机密钥检查（仅用于动态IP的实例）
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+# 私有网络配置示例
+Host 192.168.1.*
+    User local_user
+    IdentityFile ~/.ssh/local
+    # 启用密码认证
+    PasswordAuthentication yes
+    # 禁用主机密钥检查（本地网络）
+    StrictHostKeyChecking no
+
+# 多账户配置示例
+Host github-work
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/github_work
+    AddKeysToAgent yes
+
+Host github-personal
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/github_personal
+    AddKeysToAgent yes
+
+# 配置说明：
+# 1. 将此文件复制到 ~/.ssh/config
+# 2. 确保文件权限正确：chmod 600 ~/.ssh/config
+# 3. 创建控制连接目录：mkdir -p ~/.ssh/control
+# 4. 根据需要修改主机配置和密钥路径
+# 5. 确保引用的密钥文件存在且权限正确（600）

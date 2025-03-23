@@ -1,0 +1,89 @@
+{
+  "recommendations": [
+    // 主题和图标
+    "github.github-vscode-theme",
+    "pkief.material-icon-theme",
+    
+    // 通用开发工具
+    "visualstudioexptteam.vscodeintellicode",
+    "formulahendry.code-runner",
+    "christian-kohler.path-intellisense",
+    "streetsidesoftware.code-spell-checker",
+    "editorconfig.editorconfig",
+    "usernamehw.errorlens",
+    
+    // Git 相关
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+    "donjayamanne.githistory",
+    
+    // 代码格式化
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "stylelint.vscode-stylelint",
+    
+    // JavaScript/TypeScript
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-typescript-next",
+    "dsznajder.es7-react-js-snippets",
+    
+    // Python
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "njpwerner.autodocstring",
+    
+    // 前端开发
+    "ritwickdey.liveserver",
+    "bradlc.vscode-tailwindcss",
+    "pranaygp.vscode-css-peek",
+    "steoates.autoimport",
+    
+    // Markdown
+    "yzhang.markdown-all-in-one",
+    "davidanson.vscode-markdownlint",
+    "shd101wyy.markdown-preview-enhanced",
+    
+    // Docker
+    "ms-azuretools.vscode-docker",
+    "ms-vscode-remote.remote-containers",
+    
+    // 远程开发
+    "ms-vscode-remote.remote-ssh",
+    "ms-vscode-remote.remote-wsl",
+    
+    // 数据库
+    "mtxr.sqltools",
+    "mongodb.mongodb-vscode",
+    
+    // 实用工具
+    "gruntfuggly.todo-tree",
+    "vscode-icons-team.vscode-icons",
+    "wayou.vscode-todo-highlight",
+    "aaron-bond.better-comments",
+    "mhutchie.git-graph",
+    "eamodio.gitlens",
+    
+    // 终端增强
+    "tyriar.terminal-tabs",
+    "formulahendry.terminal",
+    
+    // 代码片段和自动完成
+    "visualstudioexptteam.intellicode-api-usage-examples",
+    "christian-kohler.npm-intellisense",
+    
+    // 测试和调试
+    "ryanluker.vscode-coverage-gutters",
+    "ms-vscode.test-adapter-converter",
+    
+    // 安全
+    "snyk-security.snyk-vulnerability-scanner",
+    
+    // 文档
+    "ms-toolsai.jupyter",
+    "ms-toolsai.jupyter-keymap",
+    
+    // 性能和优化
+    "wix.vscode-import-cost",
+    "kisstkondoros.vscode-codemetrics"
+  ]
+}
