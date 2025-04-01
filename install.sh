@@ -192,6 +192,41 @@ setup_ssh() {
     fi
 }
 
+# 配置 ghostty
+configure_ghostty() {
+    log "配置ghostty..."
+    
+    # 复制ghostty配置模板
+    if [ ! -f "$HOME/.ghostty/config.json" ]; then
+        mkdir -p "$HOME/.ghostty"
+        cp "$DOTFILES_DIR/ghostty/config.json" "$HOME/.ghostty/config.json"
+        chmod 600 "$HOME/.ghostty/config.json"
+        success "已创建ghostty配置文件"
+    else
+        warn "ghostty配置文件已存在，跳过创建"
+    fi
+
+    # 复制ghostty配置文件
+    if [ ! -f "$HOME/.config/ghostty/config" ]; then
+        mkdir -p "$HOME/.config/ghostty"
+        cp "$DOTFILES_DIR/ghostty/config" "$HOME/.config/ghostty/config"
+        chmod 600 "$HOME/.config/ghostty/config"
+        success "已创建ghostty主配置文件"
+    else
+        warn "ghostty主配置文件已存在，跳过创建"
+    fi
+
+    # 创建符号链接以确保配置文件生效
+    if [ ! -L "$HOME/.ghostty/config" ] && [ ! -f "$HOME/.ghostty/config" ]; then
+        ln -s "$HOME/.config/ghostty/config" "$HOME/.ghostty/config" 
+        success "已创建ghostty配置符号链接"
+    else
+        warn "ghostty配置符号链接已存在，跳过创建"
+    fi
+
+    log "ghostty配置完成"
+}
+
 # 主安装流程
 main() {
     local os_type
@@ -209,6 +244,7 @@ main() {
     setup_vim
     setup_vscode
     setup_ssh
+    configure_ghostty
     
     success "安装完成！"
     warn "备份文件位置: $BACKUP_DIR"
