@@ -1,6 +1,10 @@
 [user]
     name = zhiyue
     email = cszhiyue@gmail.com
+	signingkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB1lyUIcT0+tYsHwHfu8HlPLgBiSAUXZ1sdO2GllFV3r"
+
+[gpg "ssh"]
+  program = "C:/Users/zhiyue/AppData/Local/1Password/app/8/op-ssh-sign.exe"
 
 [credential]
 	helper = manager
@@ -14,3 +18,9 @@
 	
 [init]
 	defaultBranch = main
+
+[gpg]
+    format = ssh
+
+[commit]
+    gpgsign = true

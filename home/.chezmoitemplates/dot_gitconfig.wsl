@@ -1,6 +1,7 @@
 [user]
     name = zhiyue
     email = cszhiyue@gmail.com
+    signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB1lyUIcT0+tYsHwHfu8HlPLgBiSAUXZ1sdO2GllFV3r
 
 [credential]
     helper = store
@@ -50,7 +51,7 @@
     format = ssh
 
 [gpg "ssh"]
-    program = /mnt/c/Users/{{ .chezmoi.username }}/AppData/Local/1Password/app/8/op-ssh-sign-wsl.exe
+    program = /mnt/c/Users/zhiyue/AppData/Local/1Password/app/8/op-ssh-sign-wsl.exe
     # If the above path doesn't work, you may need to find the correct path to op-ssh-sign-wsl.exe
     # You can try running: find /mnt/c/Users/{{ .chezmoi.username }}/AppData/Local/1Password -name "op-ssh-sign-wsl.exe"
 
