@@ -14,14 +14,14 @@ LICENSE
 # Windows 特定文件 (忽略于非 Windows 系统)
 {{ if ne .chezmoi.os "windows" }}
 # Windows 配置文件
-home/.chezmoitemplates/dot_gitconfig.windows
-home/Documents/WindowsPowerShell/
-home/AppData/
-home/scoop/
+.chezmoitemplates/dot_gitconfig.windows
+Documents/WindowsPowerShell/
+AppData/
+scoop/
 
 # Windows 脚本
-home/.chezmoiscripts/windows/
-home/.chezmoiscripts/run_once_windows_*.ps1.tmpl
+.chezmoiscripts/windows/**
+.chezmoiscripts/run_once_windows_*.ps1.tmpl
 *.bat
 *.cmd
 *.ps1
@@ -30,24 +30,40 @@ home/.chezmoiscripts/run_once_windows_*.ps1.tmpl
 # macOS 特定文件 (忽略于非 macOS 系统)
 {{ if ne .chezmoi.os "darwin" }}
 # macOS 配置文件
-home/.chezmoitemplates/dot_gitconfig.darwin
-home/Library/
+.chezmoitemplates/dot_gitconfig.darwin
+Library/
 
 # macOS 脚本
-home/.chezmoiscripts/darwin/
-home/.chezmoiscripts/run_once_darwin_*.sh.tmpl
+.chezmoiscripts/darwin/**
+.chezmoiscripts/run_once_darwin_*.sh.tmpl
 {{ end }}
 
 # Linux 特定文件 (忽略于非 Linux 系统)
 {{ if ne .chezmoi.os "linux" }}
 # Linux 配置文件
-home/.chezmoitemplates/dot_gitconfig.linux
-home/.config/
-home/.local/share/
+.chezmoitemplates/dot_gitconfig.linux
+.config/
+.local/share/
 
 # Linux 脚本
-home/.chezmoiscripts/linux/
-home/.chezmoiscripts/run_once_linux_*.sh.tmpl
+.chezmoiscripts/linux/**
+.chezmoiscripts/run_once_linux_*.sh.tmpl
+{{ end }}
+
+# WSL 特定文件 (忽略于非 WSL 系统)
+{{ if or (ne .chezmoi.os "linux") (not (contains "microsoft" .chezmoi.kernel.osrelease)) }}
+# WSL 配置文件
+.chezmoitemplates/dot_gitconfig.wsl
+.chezmoitemplates/dot_ssh_config.wsl
+
+# WSL 脚本
+.chezmoiscripts/wsl/**
+{{ end }}
+
+# 常规 Linux 特定文件 (忽略于 WSL 系统)
+{{ if and (eq .chezmoi.os "linux") (contains "microsoft" .chezmoi.kernel.osrelease) }}
+# 常规 Linux 配置文件
+.chezmoitemplates/dot_ssh_config.linux
 {{ end }}
 
 # 忽略 IDE 和编辑器配置文件
@@ -69,20 +85,5 @@ Thumbs.db
 __pycache__/
 node_modules/
 
-# 忽略敏感信息文件
-**/*_secret*
-**/*_private*
-**/*.key
-**/*.pem
-**/*.crt
 
-# 忽略大型文件
-**/*.iso
-**/*.zip
-**/*.tar.gz
-**/*.tgz
-**/*.rar
-**/*.7z
 
-windows
-home/windows
