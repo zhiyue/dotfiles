@@ -1,0 +1,83 @@
+#!/bin/bash
+
+{{- if eq .chezmoi.os "linux" }}
+
+echo "Setting up Atuin shell history..."
+
+# Check if Atuin is already installed
+if command -v atuin &> /dev/null; then
+    echo "✅ Atuin is already installed."
+    ATUIN_VERSION=$(atuin --version | head -n 1 | awk '{print $2}')
+    echo "   Current version: $ATUIN_VERSION"
+
+    # Ask if user wants to reinstall/update
+    echo "Do you want to reinstall/update Atuin? (y/n)"
+    read -p "> " update_choice
+    if [[ $update_choice != "y" && $update_choice != "Y" ]]; then
+        echo "Skipping Atuin installation."
+    else
+        # Proceed with installation/update
+        echo "Reinstalling/updating Atuin..."
+        # Check for curl
+        if ! command -v curl &> /dev/null; then
+            echo "Error: curl is not installed. Please install curl first."
+            echo "You can usually install it with: sudo apt install curl, sudo dnf install curl, etc."
+            exit 1
+        fi
+
+        # Install/update Atuin
+        echo "Running Atuin installer..."
+        curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
+
+        # Verify installation
+        if ! command -v atuin &> /dev/null; then
+            echo "Error: Atuin installation failed."
+            exit 1
+        else
+            NEW_VERSION=$(atuin --version | head -n 1 | awk '{print $2}')
+            echo "✅ Atuin updated successfully! Version: $NEW_VERSION"
+        fi
+    fi
+else
+    # Atuin is not installed, proceed with installation
+    # Check if curl is installed
+    if ! command -v curl &> /dev/null; then
+        echo "Error: curl is not installed. Please install curl first."
+        echo "You can usually install it with: sudo apt install curl, sudo dnf install curl, etc."
+        exit 1
+    fi
+
+    # Install Atuin
+    echo "Running Atuin installer..."
+    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
+
+    # Check if installation was successful
+    if ! command -v atuin &> /dev/null; then
+        echo "Error: Atuin installation failed."
+        exit 1
+    else
+        INSTALLED_VERSION=$(atuin --version | head -n 1 | awk '{print $2}')
+        echo "✅ Atuin installed successfully! Version: $INSTALLED_VERSION"
+    fi
+fi
+
+# Configure Atuin for bash if .bashrc exists
+if [ -f ~/.bashrc ] && ! grep -q "# Atuin shell history" ~/.bashrc; then
+    echo "" >> ~/.bashrc
+    echo "# Atuin shell history" >> ~/.bashrc
+    echo 'eval "$(atuin init bash)"' >> ~/.bashrc
+    echo "✅ Added Atuin configuration to .bashrc"
+fi
+
+# Configure Atuin for zsh if .zshrc exists
+if [ -f ~/.zshrc ] && ! grep -q "# Atuin shell history" ~/.zshrc; then
+    echo "" >> ~/.zshrc
+    echo "# Atuin shell history" >> ~/.zshrc
+    echo 'eval "$(atuin init zsh)"' >> ~/.zshrc
+    echo "✅ Added Atuin configuration to .zshrc"
+fi
+
+echo "Atuin installation complete!"
+echo "Please restart your shell or run 'source ~/.bashrc' or 'source ~/.zshrc' to apply the changes."
+
+{{- end }}
