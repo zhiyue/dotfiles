@@ -68,6 +68,6 @@ Library/
 .chezmoitemplates/dot_ssh_config.linux
 {{ end }}
 
-
+.oh-my-zsh/
 
 
