@@ -1,0 +1,269 @@
+#!/bin/bash
+# Ubuntu APT源切换脚本 - 中国镜像源版本
+# 适用于各版本Ubuntu, 包括24.04+新格式
+
+# 定义颜色
+GREEN="\033[0;32m"
+RED="\033[0;31m"
+YELLOW="\033[0;33m"
+BLUE="\033[0;34m"
+RESET="\033[0m"
+
+# 显示标题
+echo -e "${GREEN}==========================================${RESET}"
+echo -e "${GREEN}  Ubuntu APT源切换脚本 - 中国镜像源版本  ${RESET}"
+echo -e "${GREEN}==========================================${RESET}"
+
+# 检查是否为root用户
+if [ "$(id -u)" -ne 0 ]; then
+    echo -e "${RED}错误: 请使用root权限运行此脚本 (sudo)${RESET}" >&2
+    exit 1
+fi
+
+# 检测Ubuntu版本
+if ! command -v lsb_release &> /dev/null; then
+    echo -e "${RED}错误: 未找到lsb_release命令，请安装 lsb-release 包${RESET}" >&2
+    echo "可以运行: apt install lsb-release"
+    exit 1
+fi
+
+VERSION=$(lsb_release -cs)
+UBUNTU_VERSION=$(lsb_release -rs)
+DISTRO_ID=$(lsb_release -is)
+
+# 确保是Ubuntu或其衍生版
+if [[ "$DISTRO_ID" != "Ubuntu"* && "$DISTRO_ID" != "Debian"* && "$DISTRO_ID" != "LinuxMint"* && "$DISTRO_ID" != "elementary"* ]]; then
+    echo -e "${YELLOW}警告: 检测到非Ubuntu系统或不支持的衍生版: ${DISTRO_ID}${RESET}"
+    echo -e "${YELLOW}此脚本主要为Ubuntu设计，可能不适用于当前系统。${RESET}"
+    echo -e "${YELLOW}是否继续? (y/n)${RESET}"
+    read -p "> " continue_choice
+    if [[ $continue_choice != "y" && $continue_choice != "Y" ]]; then
+        echo -e "${RED}操作已取消${RESET}"
+        exit 1
+    fi
+fi
+
+echo -e "${YELLOW}检测到系统:${RESET} $DISTRO_ID $UBUNTU_VERSION ($VERSION)"
+
+# 镜像源选择菜单
+echo -e "${BLUE}请选择要使用的中国镜像源:${RESET}"
+echo -e "1) 阿里云镜像源 (mirrors.aliyun.com)"
+echo -e "2) 清华大学镜像源 (mirrors.tuna.tsinghua.edu.cn)"
+echo -e "3) 中科大镜像源 (mirrors.ustc.edu.cn)"
+echo -e "4) 网易镜像源 (mirrors.163.com)"
+echo -e "5) 华为云镜像源 (repo.huaweicloud.com)"
+
+read -p "请输入选择 [1-5] (默认: 1): " mirror_choice
+
+case $mirror_choice in
+    2)
+        MIRROR="mirrors.tuna.tsinghua.edu.cn"
+        MIRROR_NAME="清华大学镜像源"
+        ;;
+    3)
+        MIRROR="mirrors.ustc.edu.cn"
+        MIRROR_NAME="中科大镜像源"
+        ;;
+    4)
+        MIRROR="mirrors.163.com"
+        MIRROR_NAME="网易镜像源"
+        ;;
+    5)
+        MIRROR="repo.huaweicloud.com"
+        MIRROR_NAME="华为云镜像源"
+        ;;
+    *)
+        MIRROR="mirrors.aliyun.com"
+        MIRROR_NAME="阿里云镜像源"
+        ;;
+esac
+
+echo -e "${YELLOW}您选择了: ${MIRROR_NAME} (${MIRROR})${RESET}"
+
+# 检查网络连接 (使用curl替代ping，更可靠)
+echo -e "${YELLOW}正在检查网络连接...${RESET}"
+if ! curl -s --connect-timeout 5 "https://${MIRROR}" > /dev/null; then
+    echo -e "${RED}警告: 无法连接到 ${MIRROR}${RESET}"
+    echo -e "${YELLOW}这可能是暂时的网络问题或者镜像站点当前不可用。${RESET}"
+    echo -e "${YELLOW}是否继续? (y/n)${RESET}"
+    read -p "> " continue_choice
+    if [[ $continue_choice != "y" && $continue_choice != "Y" ]]; then
+        echo -e "${RED}操作已取消${RESET}"
+        exit 1
+    fi
+fi
+
+# 备份原始源文件
+echo -e "${YELLOW}正在备份当前APT源配置...${RESET}"
+TIMESTAMP=$(date +%Y%m%d%H%M%S)
+BACKUP_DIR="/etc/apt/sources.list.backup"
+
+# 创建备份目录
+mkdir -p $BACKUP_DIR
+
+# 处理新版Ubuntu (24.04及以后)使用的ubuntu.sources
+NEW_FORMAT=false
+
+# 检查是否存在deb822格式的源文件
+if ls /etc/apt/sources.list.d/*.sources &> /dev/null || [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+    NEW_FORMAT=true
+    echo -e "${YELLOW}检测到新版APT源文件格式 (deb822)${RESET}"
+    
+    # 备份所有.sources文件
+    for sources_file in /etc/apt/sources.list.d/*.sources; do
+        if [ -f "$sources_file" ]; then
+            base_name=$(basename "$sources_file")
+            backup_file="${BACKUP_DIR}/${base_name}.${TIMESTAMP}"
+            echo "备份 $sources_file 到 $backup_file"
+            cp "$sources_file" "$backup_file" || {
+                echo -e "${RED}备份失败!${RESET}"
+                exit 1
+            }
+        fi
+    done
+    
+    # 处理主sources.list文件(如果存在)
+    if [ -f /etc/apt/sources.list ] && [ -s /etc/apt/sources.list ]; then
+        cp /etc/apt/sources.list "${BACKUP_DIR}/sources.list.${TIMESTAMP}" || {
+            echo -e "${RED}备份sources.list失败!${RESET}"
+            exit 1
+        }
+    fi
+
+    # 为常见的Ubuntu版本创建正确的deb822格式文件
+    # 首先，移除或禁用现有的源文件
+    echo -e "${YELLOW}正在更新源文件...${RESET}"
+    
+    for sources_file in /etc/apt/sources.list.d/*.sources; do
+        if [ -f "$sources_file" ]; then
+            # 将现有文件备份并移除
+            mv "$sources_file" "${sources_file}.disabled" || {
+                echo -e "${RED}无法禁用现有源文件 $sources_file!${RESET}"
+                exit 1
+            }
+        fi
+    done
+    
+    # 创建新的ubuntu.sources文件
+    cat > /etc/apt/sources.list.d/ubuntu-cn-mirrors.sources << EOF
+# 由APT源切换脚本自动生成 - 使用${MIRROR_NAME}
+# 更新时间: $(date "+%Y-%m-%d %H:%M:%S")
+
+# 主软件仓库
+Types: deb deb-src
+URIs: https://${MIRROR}/ubuntu
+Suites: ${VERSION} ${VERSION}-updates ${VERSION}-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+# 安全更新
+Types: deb deb-src
+URIs: https://${MIRROR}/ubuntu
+Suites: ${VERSION}-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+EOF
+
+    # 如果存在原始sources.list文件，将其禁用
+    if [ -f /etc/apt/sources.list ]; then
+        mv /etc/apt/sources.list /etc/apt/sources.list.disabled || {
+            echo -e "${RED}无法禁用原始sources.list文件!${RESET}"
+            exit 1
+        }
+    fi
+else
+    # 处理传统的sources.list文件
+    echo -e "${YELLOW}使用传统sources.list文件格式${RESET}"
+    
+    if [ -f /etc/apt/sources.list ]; then
+        cp /etc/apt/sources.list "${BACKUP_DIR}/sources.list.${TIMESTAMP}" || {
+            echo -e "${RED}备份sources.list失败!${RESET}"
+            exit 1
+        }
+        
+        # 配置国内镜像源
+        echo -e "${YELLOW}正在更新APT源为${MIRROR_NAME}...${RESET}"
+        
+        # 生成新的sources.list文件
+        cat > /etc/apt/sources.list << EOF
+# 由APT源切换脚本自动生成 - 使用${MIRROR_NAME}
+# 更新时间: $(date "+%Y-%m-%d %H:%M:%S")
+
+deb https://${MIRROR}/ubuntu/ ${VERSION} main restricted universe multiverse
+deb https://${MIRROR}/ubuntu/ ${VERSION}-updates main restricted universe multiverse
+deb https://${MIRROR}/ubuntu/ ${VERSION}-backports main restricted universe multiverse
+deb https://${MIRROR}/ubuntu/ ${VERSION}-security main restricted universe multiverse
+
+# 源码镜像
+deb-src https://${MIRROR}/ubuntu/ ${VERSION} main restricted universe multiverse
+deb-src https://${MIRROR}/ubuntu/ ${VERSION}-updates main restricted universe multiverse
+deb-src https://${MIRROR}/ubuntu/ ${VERSION}-backports main restricted universe multiverse
+deb-src https://${MIRROR}/ubuntu/ ${VERSION}-security main restricted universe multiverse
+EOF
+    else
+        echo -e "${RED}错误: 未找到源文件 /etc/apt/sources.list${RESET}"
+        exit 1
+    fi
+fi
+
+# 更新软件包列表
+echo -e "${YELLOW}正在更新软件包列表，这可能需要一些时间...${RESET}"
+if apt update; then
+    echo -e "${GREEN}APT源已成功更换为${MIRROR_NAME}!${RESET}"
+else
+    echo -e "${RED}更新失败! 可能源配置有误${RESET}"
+    echo -e "${YELLOW}是否恢复原始配置? (y/n)${RESET}"
+    read -p "> " restore_choice
+    if [[ $restore_choice == "y" || $restore_choice == "Y" ]]; then
+        echo -e "${YELLOW}正在恢复原始配置...${RESET}"
+        
+        if [ "$NEW_FORMAT" = true ]; then
+            # 恢复所有.sources文件
+            for disabled_file in /etc/apt/sources.list.d/*.disabled; do
+                if [ -f "$disabled_file" ]; then
+                    original_file="${disabled_file%.disabled}"
+                    echo "恢复 $original_file"
+                    mv "$disabled_file" "$original_file"
+                fi
+            done
+            
+            # 移除我们创建的sources文件
+            if [ -f /etc/apt/sources.list.d/ubuntu-cn-mirrors.sources ]; then
+                rm /etc/apt/sources.list.d/ubuntu-cn-mirrors.sources
+            fi
+            
+            # 恢复sources.list（如果存在）
+            if [ -f /etc/apt/sources.list.disabled ]; then
+                mv /etc/apt/sources.list.disabled /etc/apt/sources.list
+            fi
+        else
+            # 恢复传统sources.list
+            cp "${BACKUP_DIR}/sources.list.${TIMESTAMP}" /etc/apt/sources.list
+        fi
+        
+        echo -e "${YELLOW}已恢复原始配置${RESET}"
+        apt update
+    else
+        echo -e "${YELLOW}保留新配置，但可能需要手动修复${RESET}"
+    fi
+    exit 1
+fi
+
+# 提供恢复说明
+echo -e "${GREEN}==========================================${RESET}"
+echo -e "${GREEN}切换完成!${RESET}"
+echo -e "${YELLOW}所有备份文件已保存在: ${BACKUP_DIR}${RESET}"
+echo
+echo -e "${YELLOW}如需手动恢复原始配置:${RESET}"
+if [ "$NEW_FORMAT" = true ]; then
+    echo "1. 禁用新创建的源文件:"
+    echo "   sudo mv /etc/apt/sources.list.d/ubuntu-cn-mirrors.sources /etc/apt/sources.list.d/ubuntu-cn-mirrors.sources.disabled"
+    echo
+    echo "2. 恢复原始源文件:"
+    echo "   sudo find $BACKUP_DIR -name \"*.${TIMESTAMP}\" -exec bash -c 'cp \"{}\" \"\$(echo \"{}\" | sed \"s/\\.${TIMESTAMP}//\" | sed \"s|${BACKUP_DIR}|/etc/apt|g\")\"' \\;"
+else
+    echo "   sudo cp ${BACKUP_DIR}/sources.list.${TIMESTAMP} /etc/apt/sources.list"
+fi
+echo
+echo -e "3. 更新: ${GREEN}sudo apt update${RESET}"
+echo -e "${GREEN}==========================================${RESET}"
