@@ -9,7 +9,6 @@ LICENSE
 .gitmodules
 .gitattributes
 
-# 忽略特定于操作系统的文件
 
 # Windows 特定文件 (忽略于非 Windows 系统)
 {{ if ne .chezmoi.os "windows" }}
@@ -42,7 +41,6 @@ Library/
 {{ if ne .chezmoi.os "linux" }}
 # Linux 配置文件
 .chezmoitemplates/dot_gitconfig.linux
-.config/
 .local/share/
 
 # Linux 脚本
@@ -84,6 +82,3 @@ Thumbs.db
 .cache/
 __pycache__/
 node_modules/
-
-
-

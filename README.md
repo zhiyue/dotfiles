@@ -138,6 +138,43 @@ chezmoi diff
 chezmoi merge ~/.bashrc
 ```
 
+## 在 VSCode 开发容器中使用
+
+本仓库已配置为可以在 VSCode 开发容器（Dev Containers）中使用。这样，当您在任何项目的开发容器中工作时，都能自动应用您的个人配置。
+
+### 设置步骤
+
+1. 确保您已安装 [VS Code](https://code.visualstudio.com/) 和 [Dev Containers 扩展](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+
+2. 在 VS Code 中，打开设置（`Ctrl+,` 或 `Cmd+,`），搜索 `dotfiles`
+
+3. 在 `Dev > Containers: Dotfiles` 设置中添加以下配置：
+   - **Repository**: `zhiyue/dotfiles`
+   - **Target Path**: `~/dotfiles`
+   - **Install Command**: `./install.sh`
+
+   或者，直接在 `settings.json` 中添加：
+   ```json
+   "dev.containers.dotfiles.repository": "zhiyue/dotfiles",
+   "dev.containers.dotfiles.targetPath": "~/dotfiles",
+   "dev.containers.dotfiles.installCommand": "./install.sh"
+   ```
+
+4. 现在，每当您打开一个开发容器时，VS Code 将自动克隆您的 dotfiles 仓库并运行安装脚本，从而应用您的个人配置。
+
+### 工作原理
+
+- 当开发容器启动时，VS Code 会克隆您的 dotfiles 仓库到容器中
+- 安装脚本 (`install.sh`) 会安装 chezmoi 并应用您的配置
+- 脚本会检测容器环境并相应地调整配置
+- 您的 shell、编辑器和其他工具配置将在容器中可用
+
+### 注意事项
+
+- 容器环境中会使用 vim 作为默认编辑器（而不是 VS Code）
+- 某些特定于操作系统的配置会根据容器环境自动调整
+- 如果您在容器中遇到问题，可以手动运行 `chezmoi apply -v` 查看详细输出
+
 ## 贡献
 
 欢迎提交 Pull Request 或 Issue 来改进这个配置仓库。在提交前，请确保：

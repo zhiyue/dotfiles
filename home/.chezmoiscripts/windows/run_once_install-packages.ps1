@@ -36,3 +36,8 @@ scoop install fd
 scoop install bat
 scoop install posh-git
 # 可以添加更多您需要的软件包
+
+
+# winget install -e --id Docker.DockerDesktop
+
+winget install starship

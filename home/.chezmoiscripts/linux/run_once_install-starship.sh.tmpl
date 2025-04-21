@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Only run this script on Linux (non-WSL) environments
+{{- if and (eq .chezmoi.os "linux") (not (contains "microsoft" .chezmoi.kernel.osrelease)) }}
+
+echo "Installing Starship prompt..."
+
+# Check if curl is installed
+if ! command -v curl &> /dev/null; then
+    echo "Error: curl is not installed. Please install curl first."
+    echo "You can usually install it with: sudo apt install curl, sudo dnf install curl, etc."
+    exit 1
+fi
+
+# Install Starship
+curl -sS https://starship.rs/install.sh | sh -s -- -y
+
+# Check if installation was successful
+if ! command -v starship &> /dev/null; then
+    echo "Error: Starship installation failed."
+    exit 1
+fi
+
+echo "✅ Starship prompt installed successfully!"
+
+# Configure shell to use Starship if not already configured
+# For Bash
+if [ -f ~/.bashrc ] && ! grep -q "starship init bash" ~/.bashrc; then
+    echo -e "\n# Initialize Starship prompt\neval \"\$(starship init bash)\"" >> ~/.bashrc
+    echo "Added Starship initialization to ~/.bashrc"
+fi
+
+# For Zsh
+if [ -f ~/.zshrc ] && ! grep -q "starship init zsh" ~/.zshrc; then
+    echo -e "\n# Initialize Starship prompt\neval \"\$(starship init zsh)\"" >> ~/.zshrc
+    echo "Added Starship initialization to ~/.zshrc"
+fi
+
+echo "Starship prompt has been installed and configured."
+echo "Please restart your shell or run 'source ~/.bashrc' (or ~/.zshrc) to apply the changes."
+
+{{- end }}
