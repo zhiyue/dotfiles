@@ -1,0 +1,85 @@
+# 忽略 README 和其他文档
+README.md
+LICENSE
+*.md
+
+# 忽略版本控制相关文件
+.git/
+.gitignore
+.gitmodules
+.gitattributes
+
+# 忽略特定于操作系统的文件
+
+# Windows 特定文件 (忽略于非 Windows 系统)
+{{ if ne .chezmoi.os "windows" }}
+# Windows 配置文件
+home/.chezmoitemplates/dot_gitconfig.windows
+home/Documents/WindowsPowerShell/
+home/AppData/
+home/scoop/
+
+# Windows 脚本
+home/.chezmoiscripts/windows/
+home/.chezmoiscripts/run_once_windows_*.ps1.tmpl
+*.bat
+*.cmd
+*.ps1
+{{ end }}
+
+# macOS 特定文件 (忽略于非 macOS 系统)
+{{ if ne .chezmoi.os "darwin" }}
+# macOS 配置文件
+home/.chezmoitemplates/dot_gitconfig.darwin
+home/Library/
+
+# macOS 脚本
+home/.chezmoiscripts/darwin/
+home/.chezmoiscripts/run_once_darwin_*.sh.tmpl
+{{ end }}
+
+# Linux 特定文件 (忽略于非 Linux 系统)
+{{ if ne .chezmoi.os "linux" }}
+# Linux 配置文件
+home/.chezmoitemplates/dot_gitconfig.linux
+home/.config/
+home/.local/share/
+
+# Linux 脚本
+home/.chezmoiscripts/linux/
+home/.chezmoiscripts/run_once_linux_*.sh.tmpl
+{{ end }}
+
+# 忽略 IDE 和编辑器配置文件
+.vscode/
+.idea/
+*.sublime-*
+
+# 忽略临时文件和备份文件
+*~
+*.swp
+*.bak
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+
+# 忽略缓存文件
+.cache/
+__pycache__/
+node_modules/
+
+# 忽略敏感信息文件
+**/*_secret*
+**/*_private*
+**/*.key
+**/*.pem
+**/*.crt
+
+# 忽略大型文件
+**/*.iso
+**/*.zip
+**/*.tar.gz
+**/*.tgz
+**/*.rar
+**/*.7z

@@ -1,0 +1,13 @@
+# 示例：从 GitHub 下载 Oh My Zsh
+# [".oh-my-zsh"]
+#     type = "archive"
+#     url = "https://github.com/ohmyzsh/ohmyzsh/archive/master.tar.gz"
+#     exact = true
+#     stripComponents = 1
+#     refreshPeriod = "168h"
+
+# 示例：克隆 Git 仓库
+# [".vim/pack/plugins/start/vim-airline"]
+#     type = "git-repo"
+#     url = "https://github.com/vim-airline/vim-airline.git"
+#     refreshPeriod = "168h"
