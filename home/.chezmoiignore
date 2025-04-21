@@ -16,14 +16,12 @@ LICENSE
 .chezmoitemplates/dot_gitconfig.windows
 Documents/WindowsPowerShell/
 AppData/
-scoop/
+.config/scoop/
+Documents/PowerShell/
+Documents/WindowsPowerShell/
 
 # Windows 脚本
 .chezmoiscripts/windows/**
-.chezmoiscripts/run_once_windows_*.ps1.tmpl
-*.bat
-*.cmd
-*.ps1
 {{ end }}
 
 # macOS 特定文件 (忽略于非 macOS 系统)
