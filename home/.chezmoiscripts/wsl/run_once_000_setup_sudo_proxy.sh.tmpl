@@ -20,19 +20,33 @@ fi
 TEMP_FILE=$(mktemp)
 chmod 600 "$TEMP_FILE"
 
+# 确保在脚本退出时删除临时文件
+trap 'rm -f "$TEMP_FILE"' EXIT
+
+# 更精确地检查配置是否已存在
+if grep -q "Defaults.*env_keep.*http_proxy.*https_proxy.*HTTP_PROXY.*HTTPS_PROXY.*no_proxy.*NO_PROXY" /etc/sudoers; then
+  echo "代理环境变量配置已存在于sudoers文件中"
+  exit 0
+fi
+
+# 检查是否存在部分配置
+if grep -q "env_keep.*proxy" /etc/sudoers; then
+  echo "警告: sudoers文件中已有部分代理环境变量配置"
+  echo "现有配置:"
+  grep "env_keep.*proxy" /etc/sudoers
+  
+  read -p "是否仍要添加新的配置行? (y/n): " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "操作已取消"
+    exit 0
+  fi
+fi
+
 # 创建sudoers文件的备份
 BACKUP_FILE="/etc/sudoers.bak.$(date +%Y%m%d%H%M%S)"
 cp /etc/sudoers "$BACKUP_FILE"
 echo "已创建备份: $BACKUP_FILE"
-
-# 确保在脚本退出时删除临时文件
-trap 'rm -f "$TEMP_FILE"' EXIT
-
-# 检查sudoers文件中是否已存在相关配置
-if grep -q "env_keep.*http_proxy" /etc/sudoers; then
-  echo "代理环境变量配置已存在于sudoers文件中"
-  exit 0
-fi
 
 # 将当前sudoers文件复制到临时文件
 cat /etc/sudoers > "$TEMP_FILE"
@@ -44,11 +58,17 @@ echo "$CONFIG_LINE" >> "$TEMP_FILE"
 visudo -c -f "$TEMP_FILE"
 if [ $? -ne 0 ]; then
   echo "sudoers语法错误，取消操作"
+  echo "恢复原始文件"
   exit 1
 fi
 
 # 安全地将临时文件内容写回sudoers文件
-visudo -cf "$TEMP_FILE" && cp "$TEMP_FILE" /etc/sudoers
+if ! visudo -cf "$TEMP_FILE"; then
+  echo "最终语法检查失败，取消操作"
+  exit 1
+fi
+
+cp "$TEMP_FILE" /etc/sudoers
 
 # 检查操作是否成功
 if grep -q "$CONFIG_LINE" /etc/sudoers; then
@@ -56,5 +76,14 @@ if grep -q "$CONFIG_LINE" /etc/sudoers; then
 else
   echo "更新sudoers文件失败"
   echo "您可以使用备份文件恢复: $BACKUP_FILE"
+  
+  # 尝试恢复备份
+  read -p "是否恢复备份? (y/n): " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    cp "$BACKUP_FILE" /etc/sudoers
+    echo "已恢复备份"
+  fi
+  
   exit 1
 fi
