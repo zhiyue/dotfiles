@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Only run this script in WSL
+{{- if and (eq .chezmoi.os "linux") (contains "microsoft" .chezmoi.kernel.osrelease) }}
+
+echo "Setting up Zsh in WSL..."
+
+# Check if zsh is already installed
+if command -v zsh &> /dev/null; then
+    echo "✅ Zsh is already installed."
+else
+    echo "Installing Zsh..."
+    sudo apt update
+    sudo apt install -y zsh
+    
+    # Check if installation was successful
+    if ! command -v zsh &> /dev/null; then
+        echo "❌ Error: Zsh installation failed."
+        exit 1
+    else
+        echo "✅ Zsh installed successfully!"
+    fi
+fi
+
+# Check if Oh My Zsh is already installed
+if [ -d "$HOME/.oh-my-zsh" ]; then
+    echo "✅ Oh My Zsh is already installed."
+else
+    echo "Note: Oh My Zsh will be installed via chezmoi external configuration."
+    echo "It should be configured in .chezmoiexternal.toml"
+fi
+
+# Set Zsh as default shell
+if [ "$SHELL" != "$(which zsh)" ]; then
+    echo "Setting Zsh as default shell..."
+    chsh -s "$(which zsh)"
+    
+    # Check if setting default shell was successful
+    if [ $? -ne 0 ]; then
+        echo "❌ Error: Failed to set Zsh as default shell."
+        echo "You may need to run 'chsh -s $(which zsh)' manually."
+    else
+        echo "✅ Zsh set as default shell!"
+    fi
+else
+    echo "✅ Zsh is already the default shell."
+fi
+
+echo ""
+echo "Zsh setup complete!"
+echo "Please restart your WSL session to start using Zsh."
+echo "If you encounter any issues, you can manually run: chsh -s $(which zsh)"
+echo ""
+
+{{- end }}
