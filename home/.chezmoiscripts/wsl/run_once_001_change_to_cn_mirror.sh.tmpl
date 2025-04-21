@@ -82,7 +82,7 @@ esac
 echo -e "${YELLOW}您选择了: ${MIRROR_NAME} (${MIRROR})${RESET}"
 
 # 检查网络连接 (使用curl替代ping，更可靠)
-echo -e "${YELLOW}正在检查网络连接...${RESET}"
+echo -e "${YELLOW}正在检查网络连接 (https://${MIRROR})...${RESET}"
 if ! curl -s --connect-timeout 5 "https://${MIRROR}" > /dev/null; then
     echo -e "${RED}警告: 无法连接到 ${MIRROR}${RESET}"
     echo -e "${YELLOW}这可能是暂时的网络问题或者镜像站点当前不可用。${RESET}"
