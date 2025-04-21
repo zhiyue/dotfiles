@@ -1,6 +1,6 @@
 # My Dotfiles
 
-使用 [chezmoi](https://www.chezmoi.io/) 管理的个人配置文件。这个仓库包含了我在不同操作系统（Windows、macOS、Linux）上使用的配置文件，通过 chezmoi 的模板系统实现了跨平台的配置管理。
+使用 [chezmoi](https://www.chezmoi.io/) 管理的个人配置文件。这个仓库包含了我在不同操作系统（Windows、macOS、Linux、WSL）上使用的配置文件，通过 chezmoi 的模板系统实现了跨平台的配置管理。
 
 ## 仓库结构
 
@@ -10,18 +10,41 @@
 ├── .chezmoiignore         # 忽略文件配置
 ├── .chezmoiroot           # 指定源目录为 home
 ├── README.md              # 本文档
+├── install.sh             # 容器环境安装脚本
 └── home/                  # 主要配置文件目录
     ├── .chezmoi.toml.tmpl            # chezmoi 配置模板
     ├── .chezmoiscripts/              # 自动化脚本目录
-    │   └── windows/                  # Windows 特定脚本
-    │       └── run_once_install-packages.ps1  # 安装软件包脚本
+    │   ├── linux/                    # Linux 特定脚本
+    │   │   ├── run_once_before_000_install_1password_cli.sh.tmpl  # 1Password CLI 安装
+    │   │   ├── run_once_before_fetch_age_key.sh.tmpl             # 获取 age 密钥
+    │   │   ├── run_once_install-atuin.sh.tmpl                    # Atuin 安装
+    │   │   └── run_once_install-starship.sh.tmpl                 # Starship 安装
+    │   ├── windows/                  # Windows 特定脚本
+    │   │   ├── run_once_before_fetch_age_key.ps1.tmpl            # 获取 age 密钥
+    │   │   └── run_once_install-packages.ps1                     # 安装软件包脚本
+    │   └── wsl/                      # WSL 特定脚本
+    │       ├── run_once_000_setup_sudo_proxy.sh.tmpl             # 设置 sudo 代理
+    │       ├── run_once_001_change_to_cn_mirror.sh.tmpl          # 切换到中国镜像源
+    │       ├── run_once_install-zsh.sh.tmpl                      # 安装 Zsh
+    │       └── run_once_setup-1password-ssh-agent.sh.tmpl        # 设置 1Password SSH 代理
     ├── .chezmoitemplates/            # 模板文件目录
-    │   └── dot_gitconfig.windows     # Windows 的 Git 配置模板
+    │   ├── Microsoft.PowerShell_profile.ps1  # PowerShell 配置模板
+    │   ├── dot_gitconfig.linux       # Linux 的 Git 配置模板
+    │   ├── dot_gitconfig.windows     # Windows 的 Git 配置模板
+    │   ├── dot_gitconfig.wsl         # WSL 的 Git 配置模板
+    │   ├── dot_ssh_config.linux      # Linux 的 SSH 配置模板
+    │   └── dot_ssh_config.wsl        # WSL 的 SSH 配置模板
+    ├── AppData/                      # Windows 应用数据目录
     ├── Documents/                    # 文档目录
     │   └── WindowsPowerShell/        # PowerShell 配置
     │       └── Microsoft.PowerShell_profile.ps1  # PowerShell 配置文件
-    ├── dot_config/                   # .config 目录（Linux/macOS）
+    ├── dot_config/                   # .config 目录（Linux/macOS/WSL）
+    │   └── starship.toml             # Starship 终端提示符配置
+    ├── dot_local/                    # .local 目录（Linux/WSL）
+    ├── dot_ssh/                      # SSH 配置目录
+    ├── dot_bashrc                    # Bash 配置文件
     ├── dot_gitignore_global          # 全局 Git 忽略文件
+    ├── dot_zshrc                     # Zsh 配置文件
     └── symlink_dot_gitconfig.tmpl    # Git 配置符号链接模板
 ```
 
@@ -58,6 +81,29 @@ chezmoi edit-config
 # 应用配置
 chezmoi apply
 ```
+
+### WSL 用户
+
+```bash
+# 安装 chezmoi
+sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
+
+# 初始化 chezmoi 仓库
+chezmoi init zhiyue/dotfiles
+
+# 编辑 chezmoi 配置（可选，会打开 .chezmoi.toml.tmpl）
+chezmoi edit-config
+
+# 应用配置
+chezmoi apply
+```
+
+WSL 环境会自动安装以下工具：
+- Zsh 和 Oh My Zsh
+- Starship 终端提示符
+- Atuin 命令历史搜索工具
+- 1Password CLI 和 SSH 代理集成
+- 中国镜像源配置（可选）
 
 ## 日常使用
 
@@ -107,9 +153,10 @@ chezmoi diff
 - `.tmpl` 文件：使用 Go 模板语法，根据操作系统等条件生成不同的配置
 - `.chezmoitemplates/` 目录：存放可重用的模板片段
 - 操作系统检测：使用 `{{ if eq .chezmoi.os "windows" }}` 等条件语句
+- WSL 检测：使用 `{{ if and (eq .chezmoi.os "linux") (contains "microsoft" .chezmoi.kernel.osrelease) }}` 条件语句
 - `.chezmoi.toml.tmpl`：定义 chezmoi 的配置，如编辑器设置等
 
-例如，Git 配置通过 `symlink_dot_gitconfig.tmpl` 根据不同操作系统链接到相应的配置文件。
+例如，Git 配置通过 `symlink_dot_gitconfig.tmpl` 根据不同操作系统链接到相应的配置文件，包括 Windows、Linux 和 WSL 特定配置。
 
 **注意**：由于使用了 `.chezmoi.toml.tmpl`，在初始化时需要先运行 `chezmoi init` 然后再运行 `chezmoi apply`，而不是直接使用 `chezmoi init --apply`。
 
@@ -117,14 +164,65 @@ chezmoi diff
 
 `.chezmoiscripts/` 目录包含在配置应用时自动执行的脚本：
 
-- Windows 脚本：安装常用软件包（通过 Scoop）
-- 脚本命名规则：`run_once_` 前缀表示脚本只会执行一次
+- Windows 脚本：安装常用软件包（通过 Scoop）和获取 age 密钥
+- Linux 脚本：安装 Starship、Atuin、1Password CLI 和获取 age 密钥
+- WSL 脚本：设置 1Password SSH 代理、安装 Zsh、切换到中国镜像源
+- 脚本命名规则：
+  - `run_once_` 前缀表示脚本只会执行一次
+  - `run_once_before_` 前缀表示脚本在应用配置前执行
+  - 数字前缀（如 `000_`）用于控制执行顺序
+
+## 特殊功能
+
+### 加密支持
+
+本仓库使用 [age](https://github.com/FiloSottile/age) 加密敏感文件：
+
+- `.chezmoi.toml.tmpl` 中配置了 age 加密
+- 敏感文件使用 `.age` 后缀，会自动加密/解密
+- 密钥通过 `run_once_before_fetch_age_key` 脚本获取
+
+### 1Password 集成
+
+本仓库支持与 1Password 密码管理器集成：
+
+- 在 Linux/WSL 环境中安装 1Password CLI
+- 在 WSL 中设置 1Password SSH 代理，实现与 Windows 1Password 应用的集成
+- 配置 Git 使用 1Password SSH 密钥进行签名
+
+**注意**：在 Linux 和 WSL 环境中使用前，需要设置 1Password 服务账号令牌：
+
+```bash
+# 设置 1Password 服务账号令牌环境变量
+export OP_SERVICE_ACCOUNT_TOKEN="你的服务账号令牌"
+
+# 验证 1Password CLI 是否可用
+op --version
+```
+
+服务账号令牌可以在 1Password 账户设置中创建，用于自动化脚本访问 1Password 数据。
+
+### Atuin 历史搜索
+
+[Atuin](https://github.com/atuinsh/atuin) 提供增强的 shell 历史搜索和同步功能：
+
+- 自动安装并配置 Atuin
+- 在 `.bashrc` 和 `.zshrc` 中集成 Atuin
+- 在 Windows 环境中忽略 Atuin 私钥文件
 
 ## 故障排除
 
 ### 模板变量问题
 
 如果在 `.chezmoiscripts` 目录下的 `.tmpl` 文件中模板变量不能正常工作，可能需要使用绝对路径或硬编码值。
+
+### WSL 网络问题
+
+在 WSL 环境中，如果遇到网络连接问题：
+
+- 检查 `/etc/resolv.conf` 配置
+- 尝试使用 `run_once_000_setup_sudo_proxy.sh.tmpl` 脚本设置代理
+- 对于中国用户，可以使用 `run_once_001_change_to_cn_mirror.sh.tmpl` 切换到国内镜像源
 
 ### 配置冲突
 
@@ -137,6 +235,26 @@ chezmoi diff
 # 合并更改（保留本地修改）
 chezmoi merge ~/.bashrc
 ```
+
+## 跨平台支持
+
+### Windows 特定功能
+
+- 通过 Scoop 安装常用软件包
+- PowerShell 配置文件和别名
+- Windows Terminal 配置
+
+### Linux 特定功能
+
+- Bash 和 Zsh 配置
+- Starship 终端提示符
+- 常用命令行工具配置
+
+### WSL 特定功能
+
+- 与 Windows 主机的集成（1Password、SSH 代理等）
+- 中国镜像源配置
+- WSL 特定的 Git 和 SSH 配置
 
 ## 在 VSCode 开发容器中使用
 
