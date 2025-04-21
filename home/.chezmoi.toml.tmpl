@@ -1,6 +1,7 @@
 
 # 运行一次：chezmoi edit-config
-# 在打开的配置文件中加入 ↓
+encryption = "age"
+
 [edit]
   command = "code-insiders"          # VS Code；改成 "nvim"、"notepad" 等均可
   args    = ["--wait"]      # VS Code 必须带 --wait 才能让 chezmoi 等你保存后再继续
@@ -8,3 +9,7 @@
 [interpreters.ps1]
     command = "pwsh"
     args = ["-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass"]
+
+[age]
+  recipient = "age1khp8uj2cqsltp8ekum38ajlq88gl6r8x79auwqfxylearqkseyyqq80em4"
+  identity  = "~/.config/age/keys.txt"

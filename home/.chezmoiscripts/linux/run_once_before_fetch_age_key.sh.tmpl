@@ -1,0 +1,125 @@
+#!/bin/bash
+
+# 设置严格错误处理
+set -e
+
+# 定义颜色
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# 定义日志函数
+log_info() {
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${BLUE}[INFO]   ${NC}$1"
+}
+
+log_warning() {
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${YELLOW}[WARNING]${NC} $1"
+}
+
+log_error() {
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${RED}[ERROR]  ${NC}$1"
+}
+
+log_success() {
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${GREEN}[SUCCESS]${NC} $1"
+}
+
+# 开始执行脚本
+log_info "开始执行 Age 密钥获取脚本"
+log_info "脚本路径: $0"
+log_info "当前用户: $(whoami)"
+log_info "当前系统信息: $(uname -a)"
+log_info "当前 Shell: $SHELL"
+log_info "当前目录: $(pwd)"
+log_info "用户主目录: $HOME"
+log_info "Chezmoi 主目录: {{ .chezmoi.homeDir }}"
+
+# 检查 1Password CLI 是否可用
+log_info "检查 1Password CLI 是否可用"
+if ! command -v op &> /dev/null; then
+    log_error "1Password CLI 未安装或不可用，请先安装 1Password CLI"
+    exit 1
+fi
+
+OP_VERSION=$(op --version 2>/dev/null || echo "无法获取版本")
+log_success "1Password CLI 版本: $OP_VERSION"
+
+# 获取 1Password 条目并提取密钥
+log_info "尝试从 1Password 获取 'chezmoi-age-key' 条目"
+ITEM_JSON=""
+if ! ITEM_JSON=$(op item get "chezmoi-age-key" --vault "Development" --format json 2>/dev/null); then
+    log_error "获取 1Password 条目失败"
+    log_error "请确保已登录 1Password CLI 且 'chezmoi-age-key' 条目存在于 'Development' 保险库中"
+    exit 1
+fi
+
+log_success "成功获取 1Password 条目"
+
+# 从条目中提取密钥字段值
+log_info "从条目中提取密钥字段值"
+KEY_VALUE=""
+if ! KEY_VALUE=$(echo "$ITEM_JSON" | jq -r '.fields[] | select(.label=="key" or .id=="key") | .value' 2>/dev/null); then
+    log_error "提取密钥字段值失败"
+    log_error "请确保 jq 已安装并且 'chezmoi-age-key' 条目包含名为 'key' 的字段"
+    exit 1
+fi
+
+if [ -z "$KEY_VALUE" ] || [ "$KEY_VALUE" = "null" ]; then
+    log_error "在条目中未找到 'key' 字段"
+    log_error "请确保 'chezmoi-age-key' 条目包含名为 'key' 的字段"
+    exit 1
+fi
+
+log_success "成功提取密钥字段值"
+
+# 确保目录存在
+log_info "正在生成 Age 密钥路径"
+log_info "Chezmoi 主目录变量值: {{ .chezmoi.homeDir }}"
+
+# 使用模板变量或回退到环境变量
+TEMPLATE_HOME_DIR="{{ .chezmoi.homeDir }}"
+if [ "$TEMPLATE_HOME_DIR" = "{{ .chezmoi.homeDir }}" ] || [ -z "$TEMPLATE_HOME_DIR" ]; then
+    log_warning "模板变量未被正确替换，使用环境变量作为回退"
+    HOME_DIR="$HOME"
+    log_info "使用环境变量 HOME: $HOME_DIR"
+else
+    HOME_DIR="$TEMPLATE_HOME_DIR"
+    log_info "使用模板变量 homeDir: $HOME_DIR"
+fi
+
+KEY_PATH="$HOME_DIR/.config/age/keys.txt"
+KEY_DIR="$(dirname "$KEY_PATH")"
+log_info "密钥将保存到: $KEY_PATH"
+log_info "检查目录是否存在: $KEY_DIR"
+
+if [ ! -d "$KEY_DIR" ]; then
+    log_info "目录不存在，正在创建..."
+    if ! mkdir -p "$KEY_DIR"; then
+        log_error "创建目录失败"
+        exit 1
+    fi
+    log_success "成功创建目录: $KEY_DIR"
+else
+    log_info "目录已存在: $KEY_DIR"
+fi
+
+# 写入文件
+log_info "正在将密钥写入文件"
+if ! echo -n "$KEY_VALUE" > "$KEY_PATH"; then
+    log_error "写入文件失败"
+    exit 1
+fi
+log_success "成功写入密钥到文件"
+
+# 设置文件权限为只有当前用户可访问
+log_info "正在设置文件权限"
+if ! chmod 600 "$KEY_PATH"; then
+    log_error "设置文件权限失败"
+    exit 1
+fi
+log_success "成功设置文件权限，只有当前用户可访问"
+
+log_success "Age 密钥获取脚本执行完成"

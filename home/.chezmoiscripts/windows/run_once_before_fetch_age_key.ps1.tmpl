@@ -1,0 +1,131 @@
+#!/usr/bin/env pwsh
+
+# 设置严格错误处理
+$ErrorActionPreference = "Stop"
+
+# 定义日志函数
+function Write-Log {
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]$Message,
+
+        [Parameter(Mandatory=$false)]
+        [ValidateSet("Info", "Warning", "Error", "Success")]
+        [string]$Level = "Info"
+    )
+
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logPrefix = switch ($Level) {
+        "Info"    { "[INFO]   " }
+        "Warning" { "[WARNING]" }
+        "Error"   { "[ERROR]  " }
+        "Success" { "[SUCCESS]" }
+        default    { "[INFO]   " }
+    }
+
+    Write-Host "$timestamp $logPrefix $Message"
+}
+
+Write-Log "开始执行 Age 密钥获取脚本" "Info"
+Write-Log "脚本路径: $PSCommandPath" "Info"
+Write-Log "当前用户: $env:USERNAME" "Info"
+Write-Log "当前系统信息: $([System.Environment]::OSVersion.VersionString)" "Info"
+Write-Log "当前 PowerShell 版本: $($PSVersionTable.PSVersion)" "Info"
+Write-Log "当前目录: $(Get-Location)" "Info"
+Write-Log "用户主目录: $env:USERPROFILE" "Info"
+Write-Log "Chezmoi 主目录: {{ .chezmoi.homeDir }}" "Info"
+
+# 只在首次 init 执行，后续 apply 不再跑
+Write-Log "检查 1Password CLI 是否可用" "Info"
+try {
+    $opVersion = op --version
+    Write-Log "1Password CLI 版本: $opVersion" "Success"
+} catch {
+    Write-Log "1Password CLI 未安装或不可用，请先安装 1Password CLI" "Error"
+    exit 1
+}
+
+# 获取 1Password 条目并提取密钥
+Write-Log "尝试从 1Password 获取 'chezmoi-age-key' 条目" "Info"
+try {
+    $item = op item get "chezmoi-age-key" --vault "Development" --format json | ConvertFrom-Json
+    Write-Log "成功获取 1Password 条目" "Success"
+} catch {
+    Write-Log "获取 1Password 条目失败: $_" "Error"
+    Write-Log "请确保已登录 1Password CLI 且 'chezmoi-age-key' 条目存在于 'Development' 保险库中" "Error"
+    exit 1
+}
+
+# 从条目中提取密钥字段值
+Write-Log "从条目中提取密钥字段值" "Info"
+try {
+    $keyField = $item.fields | Where-Object { $_.label -eq "key" -or $_.id -eq "key" }
+    if ($keyField) {
+        $keyValue = $keyField.value
+        Write-Log "成功提取密钥字段值" "Success"
+    } else {
+        Write-Log "在条目中未找到 'key' 字段" "Error"
+        Write-Log "请确保 'chezmoi-age-key' 条目包含名为 'key' 的字段" "Error"
+        exit 1
+    }
+} catch {
+    Write-Log "提取密钥字段值失败: $_" "Error"
+    exit 1
+}
+
+# 确保目录存在
+Write-Log "正在生成 Age 密钥路径" "Info"
+Write-Log "Chezmoi 主目录变量值: {{ .chezmoi.homeDir }}" "Info"
+
+# 使用模板变量或回退到环境变量
+$templateHomeDir = "{{ .chezmoi.homeDir }}"
+if ($templateHomeDir -eq "{{ .chezmoi.homeDir }}" -or $templateHomeDir -eq "") {
+    Write-Log "模板变量未被正确替换，使用环境变量作为回退" "Warning"
+    $homeDir = $env:USERPROFILE
+    Write-Log "使用环境变量 USERPROFILE: $homeDir" "Info"
+} else {
+    $homeDir = $templateHomeDir
+    Write-Log "使用模板变量 homeDir: $homeDir" "Info"
+}
+
+$keyPath = "$homeDir\.config\age\keys.txt"
+$keyDir = Split-Path -Parent $keyPath
+Write-Log "密钥将保存到: $keyPath" "Info"
+Write-Log "检查目录是否存在: $keyDir" "Info"
+Write-Log "尝试解析路径变量: $([System.Environment]::ExpandEnvironmentVariables($keyPath))" "Info"
+
+if (-not (Test-Path $keyDir)) {
+    Write-Log "目录不存在，正在创建..." "Info"
+    try {
+        New-Item -ItemType Directory -Path $keyDir -Force | Out-Null
+        Write-Log "成功创建目录: $keyDir" "Success"
+    } catch {
+        Write-Log "创建目录失败: $_" "Error"
+        exit 1
+    }
+} else {
+    Write-Log "目录已存在: $keyDir" "Info"
+}
+
+# 写入文件
+Write-Log "正在将密钥写入文件" "Info"
+try {
+    $keyValue | Out-File -FilePath $keyPath -NoNewline -Encoding utf8
+    Write-Log "成功写入密钥到文件" "Success"
+} catch {
+    Write-Log "写入文件失败: $_" "Error"
+    exit 1
+}
+
+# 设置文件权限为只有当前用户可访问
+Write-Log "正在设置文件权限" "Info"
+try {
+    icacls $keyPath /inheritance:r /Q
+    icacls $keyPath /grant:r "${env:USERNAME}:(F)" /Q
+    Write-Log "成功设置文件权限，只有当前用户可访问" "Success"
+} catch {
+    Write-Log "设置文件权限失败: $_" "Error"
+    exit 1
+}
+
+Write-Log "Age 密钥获取脚本执行完成" "Success"

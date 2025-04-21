@@ -41,3 +41,4 @@ scoop install posh-git
 # winget install -e --id Docker.DockerDesktop
 
 winget install starship
+scoop install age
