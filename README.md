@@ -107,8 +107,11 @@ chezmoi diff
 - `.tmpl` 文件：使用 Go 模板语法，根据操作系统等条件生成不同的配置
 - `.chezmoitemplates/` 目录：存放可重用的模板片段
 - 操作系统检测：使用 `{{ if eq .chezmoi.os "windows" }}` 等条件语句
+- `.chezmoi.toml.tmpl`：定义 chezmoi 的配置，如编辑器设置等
 
 例如，Git 配置通过 `symlink_dot_gitconfig.tmpl` 根据不同操作系统链接到相应的配置文件。
+
+**注意**：由于使用了 `.chezmoi.toml.tmpl`，在初始化时需要先运行 `chezmoi init` 然后再运行 `chezmoi apply`，而不是直接使用 `chezmoi init --apply`。
 
 ## 自动化脚本
 
