@@ -1,4 +1,0 @@
-[experimental]
-networkingMode=mirrored
-dnsTunneling=true
-autoProxy=true

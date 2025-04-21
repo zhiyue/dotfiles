@@ -1,0 +1,5 @@
+# 运行一次：chezmoi edit-config
+# 在打开的配置文件中加入 ↓
+[edit]
+  command = "code"          # VS Code；改成 "nvim"、"notepad" 等均可
+  args    = ["--wait"]      # VS Code 必须带 --wait 才能让 chezmoi 等你保存后再继续
