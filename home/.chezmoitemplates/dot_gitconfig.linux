@@ -1,0 +1,39 @@
+[user]
+    name = zhiyue
+    email = cszhiyue@gmail.com
+
+[credential]
+    helper = store
+
+[core]
+    editor = vim
+    excludesfile = ~/.gitignore_global
+    autocrlf = input
+    # Regular Linux settings
+    fileMode = true
+
+[init]
+    defaultBranch = main
+
+[color]
+    ui = auto
+
+[pull]
+    rebase = false
+
+[push]
+    default = simple
+
+[diff]
+    tool = vimdiff
+
+[merge]
+    tool = vimdiff
+    conflictstyle = diff3
+
+[alias]
+    st = status
+    ci = commit
+    co = checkout
+    br = branch
+    lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit

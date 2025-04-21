@@ -1,0 +1,20 @@
+# SSH Config for Linux
+
+# Default settings for all hosts
+Host *
+    # Common settings
+    ServerAliveInterval 60
+    ServerAliveCountMax 30
+    AddKeysToAgent yes
+    StrictHostKeyChecking ask
+    
+# GitHub configuration
+Host github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519_github
+    
+# Example for other hosts
+# Host example.com
+#     User username
+#     Port 22
+#     IdentityFile ~/.ssh/id_ed25519_example

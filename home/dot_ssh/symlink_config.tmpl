@@ -1,0 +1,9 @@
+{{- if eq .chezmoi.os "windows" }}
+{{ .chezmoi.sourceDir }}/.chezmoitemplates/dot_ssh_config.windows
+{{- else if eq .chezmoi.os "linux" }}
+{{- if contains "microsoft" .chezmoi.kernel.osrelease }}
+{{ .chezmoi.sourceDir }}/.chezmoitemplates/dot_ssh_config.wsl
+{{- else }}
+{{ .chezmoi.sourceDir }}/.chezmoitemplates/dot_ssh_config.linux
+{{- end }}
+{{- end }}

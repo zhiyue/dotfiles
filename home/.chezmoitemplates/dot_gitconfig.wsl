@@ -1,0 +1,60 @@
+[user]
+    name = zhiyue
+    email = cszhiyue@gmail.com
+
+[credential]
+    helper = store
+
+[core]
+    editor = vim
+    excludesfile = ~/.gitignore_global
+    autocrlf = input
+    # WSL-specific settings
+    fileMode = false
+    # Use Windows SSH executable for 1Password integration
+    sshCommand = ssh.exe
+
+[init]
+    defaultBranch = main
+
+[color]
+    ui = auto
+
+[pull]
+    rebase = false
+
+[push]
+    default = simple
+
+[diff]
+    tool = vimdiff
+
+[merge]
+    tool = vimdiff
+    conflictstyle = diff3
+
+[alias]
+    st = status
+    ci = commit
+    co = checkout
+    br = branch
+    lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+
+# WSL-specific settings
+[safe]
+    directory = *
+
+# 1Password SSH agent integration for commit signing
+# Note: Replace YOUR_PUBLIC_KEY with your actual SSH public key from 1Password
+[gpg]
+    format = ssh
+
+[gpg "ssh"]
+    program = /mnt/c/Users/zhiyue/AppData/Local/1Password/app/8/op-ssh-sign-wsl.exe
+
+[commit]
+    gpgsign = true
+
+# Uncomment and replace with your actual SSH public key from 1Password
+# [user]
+#    signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5EXAMPLE

@@ -1,0 +1,24 @@
+# SSH Config for WSL with 1Password integration
+
+# Default settings for all hosts
+Host *
+    # Use Windows SSH executable for 1Password integration
+    # This forwards SSH requests to the Windows SSH client
+    IdentityAgent ~/.1password/agent.sock
+    
+    # Common settings
+    ServerAliveInterval 60
+    ServerAliveCountMax 30
+    AddKeysToAgent yes
+    StrictHostKeyChecking ask
+    
+# GitHub configuration
+Host github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519_github
+    
+# Example for other hosts
+# Host example.com
+#     User username
+#     Port 22
+#     IdentityFile ~/.ssh/id_ed25519_example

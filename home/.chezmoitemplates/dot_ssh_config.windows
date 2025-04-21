@@ -1,0 +1,12 @@
+# SSH Config for Windows with 1Password integration
+
+# Default settings for all hosts
+Host *
+    IdentityAgent //./pipe/openssh-ssh-agent
+    
+    # Common settings
+    ServerAliveInterval 60
+    ServerAliveCountMax 30
+    AddKeysToAgent yes
+    StrictHostKeyChecking ask
+    
