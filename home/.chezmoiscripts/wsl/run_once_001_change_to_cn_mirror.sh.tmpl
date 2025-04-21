@@ -14,10 +14,11 @@ echo -e "${GREEN}==========================================${RESET}"
 echo -e "${GREEN}  Ubuntu APT源切换脚本 - 中国镜像源版本  ${RESET}"
 echo -e "${GREEN}==========================================${RESET}"
 
-# 检查是否为root用户
+# 检查是否为root用户并自动提升权限
 if [ "$(id -u)" -ne 0 ]; then
-    echo -e "${RED}错误: 请使用root权限运行此脚本 (sudo)${RESET}" >&2
-    exit 1
+    echo -e "${YELLOW}需要root权限来修改APT源，正在使用sudo...${RESET}"
+    exec sudo "$0" "$@"
+    exit $?
 fi
 
 # 检测Ubuntu版本
@@ -108,7 +109,7 @@ NEW_FORMAT=false
 if ls /etc/apt/sources.list.d/*.sources &> /dev/null || [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
     NEW_FORMAT=true
     echo -e "${YELLOW}检测到新版APT源文件格式 (deb822)${RESET}"
-    
+
     # 备份所有.sources文件
     for sources_file in /etc/apt/sources.list.d/*.sources; do
         if [ -f "$sources_file" ]; then
@@ -121,7 +122,7 @@ if ls /etc/apt/sources.list.d/*.sources &> /dev/null || [ -f /etc/apt/sources.li
             }
         fi
     done
-    
+
     # 处理主sources.list文件(如果存在)
     if [ -f /etc/apt/sources.list ] && [ -s /etc/apt/sources.list ]; then
         cp /etc/apt/sources.list "${BACKUP_DIR}/sources.list.${TIMESTAMP}" || {
@@ -133,7 +134,7 @@ if ls /etc/apt/sources.list.d/*.sources &> /dev/null || [ -f /etc/apt/sources.li
     # 为常见的Ubuntu版本创建正确的deb822格式文件
     # 首先，移除或禁用现有的源文件
     echo -e "${YELLOW}正在更新源文件...${RESET}"
-    
+
     for sources_file in /etc/apt/sources.list.d/*.sources; do
         if [ -f "$sources_file" ]; then
             # 将现有文件备份并移除
@@ -143,7 +144,7 @@ if ls /etc/apt/sources.list.d/*.sources &> /dev/null || [ -f /etc/apt/sources.li
             }
         fi
     done
-    
+
     # 创建新的ubuntu.sources文件
     cat > /etc/apt/sources.list.d/ubuntu-cn-mirrors.sources << EOF
 # 由APT源切换脚本自动生成 - 使用${MIRROR_NAME}
@@ -174,16 +175,16 @@ EOF
 else
     # 处理传统的sources.list文件
     echo -e "${YELLOW}使用传统sources.list文件格式${RESET}"
-    
+
     if [ -f /etc/apt/sources.list ]; then
         cp /etc/apt/sources.list "${BACKUP_DIR}/sources.list.${TIMESTAMP}" || {
             echo -e "${RED}备份sources.list失败!${RESET}"
             exit 1
         }
-        
+
         # 配置国内镜像源
         echo -e "${YELLOW}正在更新APT源为${MIRROR_NAME}...${RESET}"
-        
+
         # 生成新的sources.list文件
         cat > /etc/apt/sources.list << EOF
 # 由APT源切换脚本自动生成 - 使用${MIRROR_NAME}
@@ -216,7 +217,7 @@ else
     read -p "> " restore_choice
     if [[ $restore_choice == "y" || $restore_choice == "Y" ]]; then
         echo -e "${YELLOW}正在恢复原始配置...${RESET}"
-        
+
         if [ "$NEW_FORMAT" = true ]; then
             # 恢复所有.sources文件
             for disabled_file in /etc/apt/sources.list.d/*.disabled; do
@@ -226,12 +227,12 @@ else
                     mv "$disabled_file" "$original_file"
                 fi
             done
-            
+
             # 移除我们创建的sources文件
             if [ -f /etc/apt/sources.list.d/ubuntu-cn-mirrors.sources ]; then
                 rm /etc/apt/sources.list.d/ubuntu-cn-mirrors.sources
             fi
-            
+
             # 恢复sources.list（如果存在）
             if [ -f /etc/apt/sources.list.disabled ]; then
                 mv /etc/apt/sources.list.disabled /etc/apt/sources.list
@@ -240,7 +241,7 @@ else
             # 恢复传统sources.list
             cp "${BACKUP_DIR}/sources.list.${TIMESTAMP}" /etc/apt/sources.list
         fi
-        
+
         echo -e "${YELLOW}已恢复原始配置${RESET}"
         apt update
     else
