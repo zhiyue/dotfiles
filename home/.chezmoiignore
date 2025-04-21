@@ -24,6 +24,13 @@ Documents/WindowsPowerShell/
 .chezmoiscripts/windows/**
 {{ end }}
 
+# Windows 特定文件 (忽略于 Windows 系统)
+{{ if eq .chezmoi.os "windows" }}
+# Atuin 私有加密文件
+dot_local/share/private_atuin/encrypted_private_key.age
+dot_local/share/private_atuin/encrypted_private_session.age
+{{ end }}
+
 # macOS 特定文件 (忽略于非 macOS 系统)
 {{ if ne .chezmoi.os "darwin" }}
 # macOS 配置文件
