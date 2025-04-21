@@ -37,6 +37,9 @@ Library/
 
 # Linux 特定文件 (忽略于非 Linux 系统)
 {{ if ne .chezmoi.os "linux" }}
+# Linux 配置文件
+.bashrc
+.zshrc
 
 # Linux 脚本
 .chezmoiscripts/linux/**
