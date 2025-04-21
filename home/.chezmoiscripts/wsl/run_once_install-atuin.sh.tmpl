@@ -5,10 +5,15 @@
 
 echo "Setting up Atuin shell history in WSL..."
 
-# Check if Atuin is already installed
-if command -v atuin &> /dev/null; then
+# Check if Atuin is already installed (either in PATH or in custom location)
+if command -v atuin &> /dev/null || [ -f "$HOME/.atuin/bin/atuin" ]; then
     echo "✅ Atuin is already installed."
-    ATUIN_VERSION=$(atuin --version | head -n 1 | awk '{print $2}')
+    # Check if atuin is in PATH or use the custom location
+    if command -v atuin &> /dev/null; then
+        ATUIN_VERSION=$(atuin --version | head -n 1 | awk '{print $2}')
+    else
+        ATUIN_VERSION=$("$HOME/.atuin/bin/atuin" --version | head -n 1 | awk '{print $2}')
+    fi
     echo "   Current version: $ATUIN_VERSION"
 
     # Ask if user wants to reinstall/update
@@ -31,11 +36,16 @@ if command -v atuin &> /dev/null; then
         curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
 
         # Verify installation
-        if ! command -v atuin &> /dev/null; then
+        if ! command -v atuin &> /dev/null && [ ! -f "$HOME/.atuin/bin/atuin" ]; then
             echo "❌ Error: Atuin installation failed."
             exit 1
         else
-            NEW_VERSION=$(atuin --version | head -n 1 | awk '{print $2}')
+            # Check if atuin is in PATH or use the custom location
+            if command -v atuin &> /dev/null; then
+                NEW_VERSION=$(atuin --version | head -n 1 | awk '{print $2}')
+            else
+                NEW_VERSION=$("$HOME/.atuin/bin/atuin" --version | head -n 1 | awk '{print $2}')
+            fi
             echo "✅ Atuin updated successfully! Version: $NEW_VERSION"
         fi
     fi
@@ -53,12 +63,39 @@ else
     curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
 
     # Check if installation was successful
-    if ! command -v atuin &> /dev/null; then
+    if ! command -v atuin &> /dev/null && [ ! -f "$HOME/.atuin/bin/atuin" ]; then
         echo "❌ Error: Atuin installation failed."
         exit 1
     else
-        INSTALLED_VERSION=$(atuin --version | head -n 1 | awk '{print $2}')
+        # Check if atuin is in PATH or use the custom location
+        if command -v atuin &> /dev/null; then
+            INSTALLED_VERSION=$(atuin --version | head -n 1 | awk '{print $2}')
+        else
+            INSTALLED_VERSION=$("$HOME/.atuin/bin/atuin" --version | head -n 1 | awk '{print $2}')
+        fi
         echo "✅ Atuin installed successfully! Version: $INSTALLED_VERSION"
+    fi
+fi
+
+# Add Atuin bin directory to PATH if it exists and not already in PATH
+if [ -d "$HOME/.atuin/bin" ] && ! echo $PATH | grep -q "$HOME/.atuin/bin"; then
+    # Add to PATH for current session
+    export PATH="$HOME/.atuin/bin:$PATH"
+
+    # Add to .bashrc if it exists
+    if [ -f ~/.bashrc ] && ! grep -q "# Atuin bin directory" ~/.bashrc; then
+        echo "" >> ~/.bashrc
+        echo "# Atuin bin directory" >> ~/.bashrc
+        echo 'export PATH="$HOME/.atuin/bin:$PATH"' >> ~/.bashrc
+        echo "✅ Added Atuin bin directory to PATH in .bashrc"
+    fi
+
+    # Add to .zshrc if it exists
+    if [ -f ~/.zshrc ] && ! grep -q "# Atuin bin directory" ~/.zshrc; then
+        echo "" >> ~/.zshrc
+        echo "# Atuin bin directory" >> ~/.zshrc
+        echo 'export PATH="$HOME/.atuin/bin:$PATH"' >> ~/.zshrc
+        echo "✅ Added Atuin bin directory to PATH in .zshrc"
     fi
 fi
 
