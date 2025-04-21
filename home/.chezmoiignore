@@ -39,13 +39,9 @@ Library/
 
 # Linux 特定文件 (忽略于非 Linux 系统)
 {{ if ne .chezmoi.os "linux" }}
-# Linux 配置文件
-.chezmoitemplates/dot_gitconfig.linux
-.local/share/
 
 # Linux 脚本
 .chezmoiscripts/linux/**
-.chezmoiscripts/run_once_linux_*.sh.tmpl
 {{ end }}
 
 # WSL 特定文件 (忽略于非 WSL 系统)
@@ -64,21 +60,6 @@ Library/
 .chezmoitemplates/dot_ssh_config.linux
 {{ end }}
 
-# 忽略 IDE 和编辑器配置文件
-.vscode/
-.idea/
-*.sublime-*
 
-# 忽略临时文件和备份文件
-*~
-*.swp
-*.bak
-*.tmp
-*.log
-.DS_Store
-Thumbs.db
 
-# 忽略缓存文件
-.cache/
-__pycache__/
-node_modules/
+
