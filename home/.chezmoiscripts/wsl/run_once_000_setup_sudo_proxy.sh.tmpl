@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# 要添加到sudoers的配置行
+CONFIG_LINE='Defaults env_keep += "http_proxy https_proxy HTTP_PROXY HTTPS_PROXY no_proxy NO_PROXY"'
+
+# 检查是否以root权限运行
+if [ "$EUID" -ne 0 ]; then
+  echo "此脚本需要root权限，将尝试使用sudo运行"
+  exec sudo "$0" "$@"
+  exit $?
+fi
+
+# 检查visudo命令是否存在
+if ! command -v visudo &> /dev/null; then
+  echo "错误: 未找到visudo命令"
+  exit 1
+fi
+
+# 创建临时文件并设置适当权限
+TEMP_FILE=$(mktemp)
+chmod 600 "$TEMP_FILE"
+
+# 创建sudoers文件的备份
+BACKUP_FILE="/etc/sudoers.bak.$(date +%Y%m%d%H%M%S)"
+cp /etc/sudoers "$BACKUP_FILE"
+echo "已创建备份: $BACKUP_FILE"
+
+# 确保在脚本退出时删除临时文件
+trap 'rm -f "$TEMP_FILE"' EXIT
+
+# 检查sudoers文件中是否已存在相关配置
+if grep -q "env_keep.*http_proxy" /etc/sudoers; then
+  echo "代理环境变量配置已存在于sudoers文件中"
+  exit 0
+fi
+
+# 将当前sudoers文件复制到临时文件
+cat /etc/sudoers > "$TEMP_FILE"
+
+# 添加新的配置行
+echo "$CONFIG_LINE" >> "$TEMP_FILE"
+
+# 检查语法
+visudo -c -f "$TEMP_FILE"
+if [ $? -ne 0 ]; then
+  echo "sudoers语法错误，取消操作"
+  exit 1
+fi
+
+# 安全地将临时文件内容写回sudoers文件
+visudo -cf "$TEMP_FILE" && cp "$TEMP_FILE" /etc/sudoers
+
+# 检查操作是否成功
+if grep -q "$CONFIG_LINE" /etc/sudoers; then
+  echo "成功添加代理环境变量配置到sudoers文件"
+else
+  echo "更新sudoers文件失败"
+  echo "您可以使用备份文件恢复: $BACKUP_FILE"
+  exit 1
+fi

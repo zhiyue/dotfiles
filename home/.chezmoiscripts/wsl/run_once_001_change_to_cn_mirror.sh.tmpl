@@ -84,30 +84,72 @@ echo -e "${YELLOW}您选择了: ${MIRROR_NAME} (${MIRROR})${RESET}"
 # 检查网络连接 (使用curl替代ping，更可靠)
 echo -e "${YELLOW}正在检查网络连接 (https://${MIRROR})...${RESET}"
 
-# 添加更详细的调试信息
-echo -e "${BLUE}执行: curl -v --connect-timeout 5 https://${MIRROR}${RESET}"
-curl -v --connect-timeout 5 "https://${MIRROR}" > /dev/null 2>&1
-CURL_STATUS=$?
+# 显示当前用户和环境信息
+echo -e "${BLUE}当前用户: $(whoami)${RESET}"
+echo -e "${BLUE}检查代理设置:${RESET}"
+echo -e "http_proxy=${http_proxy}"
+echo -e "https_proxy=${https_proxy}"
+echo -e "all_proxy=${all_proxy}"
+echo -e "no_proxy=${no_proxy}"
 
-if [ $CURL_STATUS -ne 0 ]; then
-    echo -e "${RED}警告: 无法连接到 ${MIRROR} (curl返回状态码: $CURL_STATUS)${RESET}"
-    echo -e "${YELLOW}这可能是暂时的网络问题或者镜像站点当前不可用。${RESET}"
-    echo -e "${YELLOW}尝试使用不同的连接方式...${RESET}"
+# 尝试使用sudo -E保留用户环境变量运行curl
+if [ "$(id -u)" -eq 0 ]; then
+    echo -e "${YELLOW}当前以root身份运行，尝试使用普通用户环境...${RESET}"
+    # 获取实际用户名（如果是通过sudo运行）
+    REAL_USER=${SUDO_USER:-$(logname 2>/dev/null || echo "unknown")}
 
-    # 尝试不验证SSL证书
-    echo -e "${BLUE}尝试: curl -k -s --connect-timeout 5 https://${MIRROR}${RESET}"
-    if curl -k -s --connect-timeout 5 "https://${MIRROR}" > /dev/null 2>&1; then
-        echo -e "${GREEN}使用 -k 选项成功连接!${RESET}"
-        echo -e "${YELLOW}可能是SSL证书验证问题，将继续执行...${RESET}"
-    else
-        echo -e "${RED}仍然无法连接。${RESET}"
-        echo -e "${YELLOW}是否继续? (y/n)${RESET}"
-        read -p "> " continue_choice
-        if [[ $continue_choice != "y" && $continue_choice != "Y" ]]; then
-            echo -e "${RED}操作已取消${RESET}"
-            exit 1
+    if [ "$REAL_USER" != "unknown" ] && [ "$REAL_USER" != "root" ]; then
+        echo -e "${BLUE}尝试以用户 $REAL_USER 的环境执行curl${RESET}"
+        # 尝试使用su切换到普通用户执行curl
+        CONNECTION_OK=false
+        if su - "$REAL_USER" -c "curl -s --connect-timeout 5 https://${MIRROR} > /dev/null" 2>/dev/null; then
+            echo -e "${GREEN}使用普通用户环境成功连接!${RESET}"
+            CONNECTION_OK=true
         fi
     fi
+fi
+
+# 如果上面的方法没有成功，或者不是root用户，尝试直接连接
+if [ "${CONNECTION_OK:-false}" != "true" ]; then
+    echo -e "${BLUE}执行: curl -v --connect-timeout 5 https://${MIRROR}${RESET}"
+    curl -v --connect-timeout 5 "https://${MIRROR}" > /dev/null 2>&1
+    CURL_STATUS=$?
+
+    if [ $CURL_STATUS -ne 0 ]; then
+        echo -e "${RED}警告: 无法连接到 ${MIRROR} (curl返回状态码: $CURL_STATUS)${RESET}"
+        echo -e "${YELLOW}这可能是暂时的网络问题或者镜像站点当前不可用。${RESET}"
+        echo -e "${YELLOW}尝试使用不同的连接方式...${RESET}"
+
+        # 尝试不验证SSL证书
+        echo -e "${BLUE}尝试: curl -k -s --connect-timeout 5 https://${MIRROR}${RESET}"
+        if curl -k -s --connect-timeout 5 "https://${MIRROR}" > /dev/null 2>&1; then
+            echo -e "${GREEN}使用 -k 选项成功连接!${RESET}"
+            echo -e "${YELLOW}可能是SSL证书验证问题，将继续执行...${RESET}"
+            CONNECTION_OK=true
+        else
+            # 尝试使用IPv4
+            echo -e "${BLUE}尝试: curl -4 -s --connect-timeout 5 https://${MIRROR}${RESET}"
+            if curl -4 -s --connect-timeout 5 "https://${MIRROR}" > /dev/null 2>&1; then
+                echo -e "${GREEN}使用IPv4选项成功连接!${RESET}"
+                CONNECTION_OK=true
+            else
+                echo -e "${RED}仍然无法连接。${RESET}"
+                echo -e "${YELLOW}是否继续? (y/n)${RESET}"
+                read -p "> " continue_choice
+                if [[ $continue_choice != "y" && $continue_choice != "Y" ]]; then
+                    echo -e "${RED}操作已取消${RESET}"
+                    exit 1
+                fi
+            fi
+        fi
+    else
+        CONNECTION_OK=true
+    fi
+fi
+
+# 如果连接成功，设置一个标志
+if [ "${CONNECTION_OK:-false}" = "true" ]; then
+    echo -e "${GREEN}网络连接检查通过!${RESET}"
 fi
 
 # 备份原始源文件
