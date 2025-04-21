@@ -152,3 +152,5 @@ setopt HIST_IGNORE_DUPS            # Don't record duplicates
 setopt HIST_IGNORE_SPACE           # Don't record commands starting with space
 setopt HIST_VERIFY                 # Show command with history expansion before running it
 setopt SHARE_HISTORY               # Share history between sessions
+
+. "$HOME/.atuin/bin/env"

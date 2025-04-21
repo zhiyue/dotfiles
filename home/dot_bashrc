@@ -133,3 +133,5 @@ fi
 if [ -f ~/.bashrc.local ]; then
     . ~/.bashrc.local
 fi
+
+. "$HOME/.atuin/bin/env"
