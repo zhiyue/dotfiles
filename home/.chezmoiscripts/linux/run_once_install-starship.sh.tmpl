@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Only run this script on Linux (non-WSL) environments
-{{- if and (eq .chezmoi.os "linux") (not (contains "microsoft" .chezmoi.kernel.osrelease)) }}
-
 echo "Installing Starship prompt..."
 
 # Check if curl is installed
