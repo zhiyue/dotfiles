@@ -1,6 +1,6 @@
 #!/bin/bash
 
-{{- if eq .chezmoi.os "linux" }}
+{{- if not .is_windows }}
 
 echo "Setting up Atuin shell history..."
 

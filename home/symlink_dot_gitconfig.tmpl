@@ -1,9 +1,7 @@
-{{- if eq .chezmoi.os "windows" }}
+{{- if .is_windows }}
 {{ .chezmoi.sourceDir }}/.chezmoitemplates/dot_gitconfig.windows
-{{- else if eq .chezmoi.os "linux" }}
-{{- if contains "microsoft" .chezmoi.kernel.osrelease }}
+{{- else if .is_wsl_host }}
 {{ .chezmoi.sourceDir }}/.chezmoitemplates/dot_gitconfig.wsl
 {{- else }}
 {{ .chezmoi.sourceDir }}/.chezmoitemplates/dot_gitconfig.linux
-{{- end }}
 {{- end }}

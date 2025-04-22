@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Only run this script in WSL
-{{- if and (eq .chezmoi.os "linux") (contains "microsoft" .chezmoi.kernel.osrelease) }}
+{{- if .is_wsl_host }}
 
 echo "Setting up Zsh in WSL..."
 
@@ -12,7 +12,7 @@ else
     echo "Installing Zsh..."
     sudo apt update
     sudo apt install -y zsh
-    
+
     # Check if installation was successful
     if ! command -v zsh &> /dev/null; then
         echo "❌ Error: Zsh installation failed."
@@ -34,7 +34,7 @@ fi
 if [ "$SHELL" != "$(which zsh)" ]; then
     echo "Setting Zsh as default shell..."
     chsh -s "$(which zsh)"
-    
+
     # Check if setting default shell was successful
     if [ $? -ne 0 ]; then
         echo "❌ Error: Failed to set Zsh as default shell."
