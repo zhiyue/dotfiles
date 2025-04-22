@@ -1,0 +1,8 @@
+[wsl2]
+hostAddressLoopback=true
+
+[experimental]
+networkingMode=mirrored
+dnsTunneling=true
+autoProxy=true
+hostAddressLoopback=true
