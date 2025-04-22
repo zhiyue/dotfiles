@@ -1,3 +1,9 @@
+# 环境变量说明：
+# .is_windows   - 是否运行在 Windows（含 WSL）
+# .is_container - 是否运行在容器（Docker/Podman/devcontainer 等）
+# .is_wsl       - 是否运行在 WSL（无论宿主还是容器里）
+# .is_wsl_host  - 在 WSL 宿主层（即 Windows↔WSL 的 Linux 子系统里，但不是容器）
+
 # 忽略 README 和其他文档
 README.md
 LICENSE
@@ -11,7 +17,7 @@ LICENSE
 
 
 # Windows 特定文件 (忽略于非 Windows 系统)
-{{ if ne .chezmoi.os "windows" }}
+{{ if not .is_windows }}
 # Windows 配置文件
 .chezmoitemplates/dot_gitconfig.windows
 Documents/WindowsPowerShell/
@@ -25,10 +31,18 @@ Documents/WindowsPowerShell/
 {{ end }}
 
 # Windows 特定文件 (忽略于 Windows 系统)
-{{ if eq .chezmoi.os "windows" }}
+{{ if .is_windows }}
 # Atuin 私有加密文件
 dot_local/share/private_atuin/encrypted_private_key.age
 dot_local/share/private_atuin/encrypted_private_session.age
+# Linux 配置文件
+.bashrc
+.zshrc
+
+# Linux 脚本
+.chezmoiscripts/linux/**
+# wsl 脚本
+.chezmoiscripts/wsl/**
 {{ end }}
 
 # macOS 特定文件 (忽略于非 macOS 系统)
@@ -42,18 +56,15 @@ Library/
 .chezmoiscripts/run_once_darwin_*.sh.tmpl
 {{ end }}
 
-# Linux 特定文件 (忽略于非 Linux 系统)
-{{ if ne .chezmoi.os "linux" }}
-# Linux 配置文件
-.bashrc
-.zshrc
-
-# Linux 脚本
-.chezmoiscripts/linux/**
+# 容器环境特定处理
+{{ if .is_container }}
+# 容器环境不需要的文件
+# 如果有特定于容器的文件需要忽略，可以在这里添加
+.chezmoiscripts/wsl/**
 {{ end }}
 
 # WSL 特定文件 (忽略于非 WSL 系统)
-{{ if or (ne .chezmoi.os "linux") (not (contains "microsoft" .chezmoi.kernel.osrelease)) }}
+{{ if not .is_wsl_host }}
 # WSL 配置文件
 .chezmoitemplates/dot_gitconfig.wsl
 .chezmoitemplates/dot_ssh_config.wsl
@@ -63,7 +74,7 @@ Library/
 {{ end }}
 
 # 常规 Linux 特定文件 (忽略于 WSL 系统)
-{{ if and (eq .chezmoi.os "linux") (contains "microsoft" .chezmoi.kernel.osrelease) }}
+{{ if .is_wsl_host }}
 # 常规 Linux 配置文件
 .chezmoitemplates/dot_ssh_config.linux
 {{ end }}
