@@ -17,19 +17,20 @@ encryption = "age"
 [diff]
   exclude = ["externals"]
 
+
+{{- /* 先声明局部变量 —— 只算不输出 */}}
+{{- $isWindows   := eq .chezmoi.os "windows" }}
+{{- $isContainer := or (stat "/.dockerenv") (stat "/run/.containerenv") }}
+{{- $isWSL       := and (eq .chezmoi.os "linux")
+                         (contains "microsoft" (lower .chezmoi.kernel.osrelease)) }}
+{{- $isWSLHost   := and $isWSL (not $isContainer) }}
+
 [data]
-  # ──基 础 判 定───────────────────────────────────────────
-  # 是否运行在 Windows（含 WSL）
-  is_windows    = {{ eq .chezmoi.os "windows" }}
+# 以下四个字段供所有模板复用
+is_windows    = {{ printf "%t" $isWindows }}
+is_container  = {{ printf "%t" (not (not $isContainer)) }}
+is_wsl        = {{ printf "%t" $isWSL }}
+is_wsl_host   = {{ printf "%t" $isWSLHost }}
 
-  # 是否运行在容器（Docker/Podman/devcontainer 等）
-  is_container  = {{ or (fileExists "/.dockerenv")
-                        (fileExists "/run/.containerenv") }}
 
-  # 是否运行在 WSL（无论宿主还是容器里）
-  is_wsl        = {{ and (eq .chezmoi.os "linux")
-                          (contains "microsoft" (lower .chezmoi.kernel.osrelease)) }}
 
-  # ──组 合 判 定───────────────────────────────────────────
-  # 在 WSL 宿主层（即 Windows↔WSL 的 Linux 子系统里，但不是容器）
-  is_wsl_host   = {{ and .is_wsl (not .is_container) }}
