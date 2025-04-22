@@ -82,20 +82,20 @@ if [ -d "$HOME/.atuin/bin" ] && ! echo $PATH | grep -q "$HOME/.atuin/bin"; then
     export PATH="$HOME/.atuin/bin:$PATH"
 
     # Add to .bashrc if it exists
-    if [ -f ~/.bashrc ] && ! grep -q "# Atuin bin directory" ~/.bashrc; then
-        echo "" >> ~/.bashrc
-        echo "# Atuin bin directory" >> ~/.bashrc
-        echo 'export PATH="$HOME/.atuin/bin:$PATH"' >> ~/.bashrc
-        echo "✅ Added Atuin bin directory to PATH in .bashrc"
-    fi
+    # if [ -f ~/.bashrc ] && ! grep -q "# Atuin bin directory" ~/.bashrc; then
+    #     echo "" >> ~/.bashrc
+    #     echo "# Atuin bin directory" >> ~/.bashrc
+    #     echo 'export PATH="$HOME/.atuin/bin:$PATH"' >> ~/.bashrc
+    #     echo "✅ Added Atuin bin directory to PATH in .bashrc"
+    # fi
 
     # Add to .zshrc if it exists
-    if [ -f ~/.zshrc ] && ! grep -q "# Atuin bin directory" ~/.zshrc; then
-        echo "" >> ~/.zshrc
-        echo "# Atuin bin directory" >> ~/.zshrc
-        echo 'export PATH="$HOME/.atuin/bin:$PATH"' >> ~/.zshrc
-        echo "✅ Added Atuin bin directory to PATH in .zshrc"
-    fi
+    # if [ -f ~/.zshrc ] && ! grep -q "# Atuin bin directory" ~/.zshrc; then
+    #     echo "" >> ~/.zshrc
+    #     echo "# Atuin bin directory" >> ~/.zshrc
+    #     echo 'export PATH="$HOME/.atuin/bin:$PATH"' >> ~/.zshrc
+    #     echo "✅ Added Atuin bin directory to PATH in .zshrc"
+    # fi
 fi
 
 # Configure Atuin for bash if .bashrc exists
