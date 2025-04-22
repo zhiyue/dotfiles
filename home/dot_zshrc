@@ -57,7 +57,7 @@ export ZSH="$HOME/.oh-my-zsh"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(git zsh-syntax-highlighting)
 
 # Source oh-my-zsh if it exists
 if [ -f $ZSH/oh-my-zsh.sh ]; then
@@ -120,10 +120,10 @@ alias egrep='egrep --color=auto'
 if grep -q microsoft /proc/version 2>/dev/null; then
     # WSL-specific settings
     export BROWSER="wslview"
-    
+
     # Fix for X11 forwarding if needed
     # export DISPLAY=:0
-    
+
     # Path to Windows home
     export WINHOME="/mnt/c/Users/$USER"
 fi
@@ -155,4 +155,4 @@ setopt SHARE_HISTORY               # Share history between sessions
 
 . "$HOME/.atuin/bin/env"
 
-zstyle ':omz:update' mode disabled 
+zstyle ':omz:update' mode disabled
