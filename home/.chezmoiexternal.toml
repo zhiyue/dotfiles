@@ -1,5 +1,5 @@
 # 示例：从 GitHub 下载 Oh My Zsh
-{{ if and (eq .chezmoi.os "linux") (contains "microsoft" .chezmoi.kernel.osrelease) }}
+{{ if .is_wsl_host }}
 [".oh-my-zsh"]
   type = "git-repo"
   url  = "https://github.com/ohmyzsh/ohmyzsh.git"
@@ -11,7 +11,7 @@
   refreshPeriod = "168h"
   [".oh-my-zsh/custom/plugins/zsh-syntax-highlighting".pull]
     args = ["--ff-only"]
-    
+
 {{ end }}
 
 # 示例：克隆 Git 仓库

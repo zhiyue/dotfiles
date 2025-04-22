@@ -24,3 +24,5 @@
 
 [commit]
     gpgsign = true
+[credential "helperselector"]
+	selected = manager
