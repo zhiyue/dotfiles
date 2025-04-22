@@ -68,6 +68,9 @@ Library/
 .chezmoitemplates/dot_ssh_config.linux
 {{ end }}
 
-.oh-my-zsh/
+# 忽略 Oh My Zsh 缓存文件，避免同步不必要的临时文件
+.oh-my-zsh/cache/**
 
-
+# 忽略 Oh My Zsh 自动更新文件
+.oh-my-zsh/log/**
+.oh-my-zsh/.git*
