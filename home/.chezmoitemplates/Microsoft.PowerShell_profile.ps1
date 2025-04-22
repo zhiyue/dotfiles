@@ -50,4 +50,7 @@ function Get-TimeStamp {
 # 欢迎信息
 Write-Host "Welcome to PowerShell!" -ForegroundColor Green
 Write-Host "Current time: $(Get-TimeStamp)" -ForegroundColor Yellow
-Invoke-Expression (&starship init powershell)
+
+if (Get-Command starship -ErrorAction SilentlyContinue) {
+    Invoke-Expression (&starship init powershell)
+}
