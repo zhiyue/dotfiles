@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Only run this script in WSL
+{{- if .is_wsl_host }}
+
 # 要添加到sudoers的配置行
 CONFIG_LINE='Defaults env_keep += "http_proxy https_proxy HTTP_PROXY HTTPS_PROXY no_proxy NO_PROXY"'
 
@@ -34,7 +37,7 @@ if grep -q "env_keep.*proxy" /etc/sudoers; then
   echo "警告: sudoers文件中已有部分代理环境变量配置"
   echo "现有配置:"
   grep "env_keep.*proxy" /etc/sudoers
-  
+
   read -p "是否仍要添加新的配置行? (y/n): " -n 1 -r
   echo
   if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -76,7 +79,7 @@ if grep -q "$CONFIG_LINE" /etc/sudoers; then
 else
   echo "更新sudoers文件失败"
   echo "您可以使用备份文件恢复: $BACKUP_FILE"
-  
+
   # 尝试恢复备份
   read -p "是否恢复备份? (y/n): " -n 1 -r
   echo
@@ -84,6 +87,6 @@ else
     cp "$BACKUP_FILE" /etc/sudoers
     echo "已恢复备份"
   fi
-  
+
   exit 1
 fi
