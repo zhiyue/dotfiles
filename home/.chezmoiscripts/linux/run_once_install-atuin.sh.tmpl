@@ -115,6 +115,57 @@ if [ -f ~/.zshrc ] && ! grep -q "# Atuin shell history" ~/.zshrc; then
 fi
 
 echo "Atuin installation complete!"
+
+# Install ble.sh (Bash Line Editor)
+echo "Setting up ble.sh (Bash Line Editor)..."
+
+# Check if ble.sh is already installed
+if [ -d "$HOME/.local/share/blesh" ]; then
+    echo "✅ ble.sh is already installed."
+
+    # Ask if user wants to reinstall/update
+    echo "Do you want to reinstall/update ble.sh? (y/n)"
+    read -p "> " update_blesh_choice
+    if [[ $update_blesh_choice != "y" && $update_blesh_choice != "Y" ]]; then
+        echo "Skipping ble.sh installation."
+    else
+        echo "Reinstalling/updating ble.sh..."
+        # Download and extract
+        echo "Downloading and extracting ble.sh..."
+        curl -L https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz | tar xJf -
+
+        # Install
+        echo "Installing ble.sh..."
+        bash ble-nightly/ble.sh --install ~/.local/share
+
+        # Clean up
+        rm -rf ble-nightly
+        echo "✅ ble.sh updated successfully!"
+    fi
+else
+    # ble.sh is not installed, proceed with installation
+    # Download and extract
+    echo "Downloading and extracting ble.sh..."
+    curl -L https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz | tar xJf -
+
+    # Install
+    echo "Installing ble.sh..."
+    bash ble-nightly/ble.sh --install ~/.local/share
+
+    # Clean up
+    rm -rf ble-nightly
+    echo "✅ ble.sh installed successfully!"
+fi
+
+# Configure ble.sh for bash if .bashrc exists
+# if [ -f ~/.bashrc ] && ! grep -q "source ~/.local/share/blesh/ble.sh" ~/.bashrc; then
+#     echo "" >> ~/.bashrc
+#     echo "# ble.sh (Bash Line Editor)" >> ~/.bashrc
+#     echo 'source ~/.local/share/blesh/ble.sh' >> ~/.bashrc
+#     echo "✅ Added ble.sh configuration to .bashrc"
+# fi
+
+echo "ble.sh installation complete!"
 echo "Please restart your shell or run 'source ~/.bashrc' or 'source ~/.zshrc' to apply the changes."
 
 {{- end }}

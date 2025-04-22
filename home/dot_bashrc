@@ -143,3 +143,5 @@ fi
 
 # Atuin shell history
 eval "$(atuin init bash)"
+
+source ~/.local/share/blesh/ble.sh
