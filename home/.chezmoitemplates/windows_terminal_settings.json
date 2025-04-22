@@ -116,5 +116,6 @@
     "startOnUserLogin": true,
     "tabWidthMode": "equal",
     "theme": "dark",
-    "themes": []
+    "themes": [],
+    "useAcrylicInTabRow": true
 }
