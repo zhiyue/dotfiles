@@ -156,3 +156,6 @@ setopt SHARE_HISTORY               # Share history between sessions
 . "$HOME/.atuin/bin/env"
 
 zstyle ':omz:update' mode disabled
+
+# Atuin shell history
+eval "$(atuin init zsh)"

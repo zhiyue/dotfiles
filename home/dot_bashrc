@@ -135,3 +135,6 @@ if [ -f ~/.bashrc.local ]; then
 fi
 
 . "$HOME/.atuin/bin/env"
+
+# Atuin shell history
+eval "$(atuin init bash)"
