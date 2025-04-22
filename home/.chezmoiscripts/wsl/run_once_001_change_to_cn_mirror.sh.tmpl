@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Only run this script in WSL
+{{- if .is_wsl_host }}
+
 # Ubuntu APT源切换脚本 - 中国镜像源版本
 # 适用于各版本Ubuntu, 包括24.04+新格式
 
@@ -326,3 +330,5 @@ fi
 echo
 echo -e "3. 更新: ${GREEN}sudo apt update${RESET}"
 echo -e "${GREEN}==========================================${RESET}"
+
+{{- end }}
