@@ -105,7 +105,7 @@ fi
 debug "Contents of chezmoi source directory: $(ls -la "$CHEZMOI_SOURCE_PATH" 2>/dev/null || echo 'Cannot list directory')"
 
 info "Applying dotfiles configuration..."
-$CHEZMOI_BIN apply -v
+$CHEZMOI_BIN apply --force
 
 if [ $? -ne 0 ]; then
   error "Chezmoi apply failed"

@@ -116,10 +116,10 @@ alias gb='git branch'
 if grep -q microsoft /proc/version 2>/dev/null; then
     # WSL-specific settings
     export BROWSER="wslview"
-    
+
     # Fix for X11 forwarding if needed
     # export DISPLAY=:0
-    
+
     # Path to Windows home
     export WINHOME="/mnt/c/Users/$USER"
 fi
@@ -127,6 +127,11 @@ fi
 # Add local bin to PATH
 if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
+fi
+
+# Add chezmoi to PATH if it exists
+if [ -f "$HOME/.local/bin/chezmoi" ] && ! command -v chezmoi &> /dev/null; then
+    export PATH="$HOME/.local/bin:$PATH"
 fi
 
 # Load local configurations if they exist
