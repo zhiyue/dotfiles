@@ -2,8 +2,11 @@
     "$help": "https://aka.ms/terminal-documentation",
     "$schema": "https://aka.ms/terminal-profiles-schema-preview",
     "actions": [],
+    "alwaysShowNotificationIcon": true,
+    "autoHideWindow": true,
+    "compatibility.allowHeadless": true,
     "copyFormatting": "none",
-    "copyOnSelect": false,
+    "copyOnSelect": true,
     "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
     "keybindings": 
     [
@@ -24,6 +27,7 @@
             "keys": "alt+shift+d"
         }
     ],
+    "minimizeToNotificationArea": true,
     "newTabMenu": 
     [
         {
@@ -54,9 +58,11 @@
                 "source": "Windows.Terminal.Azure"
             },
             {
+                "colorScheme": "GruvboxDarkHard",
                 "font": 
                 {
-                    "face": "Cascadia Mono"
+                    "face": "CaskaydiaCove Nerd Font Mono",
+                    "size": 12
                 },
                 "guid": "{51855cb2-8cce-5362-8f54-464b92b32386}",
                 "hidden": false,
@@ -81,6 +87,34 @@
             }
         ]
     },
-    "schemes": [],
+    "schemes": 
+    [
+        {
+            "background": "#1B1B1B",
+            "black": "#1B1B1B",
+            "blue": "#458588",
+            "brightBlack": "#928374",
+            "brightBlue": "#83A598",
+            "brightCyan": "#8EC07C",
+            "brightGreen": "#B8BB26",
+            "brightPurple": "#D3869B",
+            "brightRed": "#FB4934",
+            "brightWhite": "#EBDBB2",
+            "brightYellow": "#FABD2F",
+            "cursorColor": "#EBDBB2",
+            "cyan": "#689D6A",
+            "foreground": "#EBDBB2",
+            "green": "#98971A",
+            "name": "GruvboxDarkHard",
+            "purple": "#B16286",
+            "red": "#CC241D",
+            "selectionBackground": "#665C54",
+            "white": "#A89984",
+            "yellow": "#D79921"
+        }
+    ],
+    "startOnUserLogin": true,
+    "tabWidthMode": "equal",
+    "theme": "dark",
     "themes": []
 }
