@@ -21,19 +21,6 @@ error() {
   printf "\033[0;31m%s\033[0m\n" "$1"
 }
 
-# Detect if we're in a container
-is_container() {
-  [ -f /.dockerenv ] || grep -q '/docker/' /proc/1/cgroup 2>/dev/null || grep -q '/lxc/' /proc/1/cgroup 2>/dev/null
-}
-
-# Set environment variable for chezmoi to know we're in a container
-if is_container; then
-  export CHEZMOI_CONTAINER=true
-  info "Running in container environment"
-else
-  info "Not running in a container environment"
-fi
-
 # Install chezmoi if not already installed
 if ! command -v chezmoi >/dev/null 2>&1; then
   info "Installing chezmoi..."
