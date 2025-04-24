@@ -107,6 +107,26 @@ WSL 环境会自动安装以下工具：
 
 ## 日常使用
 
+### 确保 chezmoi 在 PATH 中
+
+本仓库已在 `.bashrc` 和 `.zshrc` 中自动添加了以下配置，确保 chezmoi 可以在 Linux/WSL 环境中被找到：
+
+```bash
+# Add chezmoi to PATH if it exists
+if [ -f "$HOME/.local/bin/chezmoi" ] && ! command -v chezmoi &> /dev/null; then
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+```
+
+对于 PowerShell 用户，您可以通过编辑 PowerShell 配置文件来添加 chezmoi 到 PATH：
+
+```powershell
+# 在 PowerShell 配置文件中添加 chezmoi 到 PATH
+$env:Path += ";$env:USERPROFILE\.local\bin"
+```
+
+您可以通过取消注释 `.chezmoitemplates/Microsoft.PowerShell_profile.ps1` 中的相关行来启用此功能。
+
 ### 更新配置
 
 从远程仓库拉取最新更改并应用：
@@ -152,9 +172,36 @@ chezmoi diff
 
 - `.tmpl` 文件：使用 Go 模板语法，根据操作系统等条件生成不同的配置
 - `.chezmoitemplates/` 目录：存放可重用的模板片段
-- 操作系统检测：使用 `{{ if eq .chezmoi.os "windows" }}` 等条件语句
-- WSL 检测：使用 `{{ if and (eq .chezmoi.os "linux") (contains "microsoft" .chezmoi.kernel.osrelease) }}` 条件语句
 - `.chezmoi.toml.tmpl`：定义 chezmoi 的配置，如编辑器设置等
+
+### 环境检测变量
+
+本仓库定义了以下环境检测变量，用于在模板中区分不同的运行环境：
+
+- `.is_windows`：是否运行在 Windows 系统上
+- `.is_container`：是否运行在容器（Docker/Podman/devcontainer 等）中
+- `.is_wsl`：是否运行在 WSL 环境中（无论実际环境是容器还是実际的 WSL）
+- `.is_wsl_host`：是否运行在 WSL 実际环境中（非容器）
+
+这些变量在 `.chezmoi.toml.tmpl` 中定义，并在模板中使用，例如：
+
+```
+{{ if .is_windows }}
+# Windows 特定配置
+{{ else if .is_wsl_host }}
+# WSL 特定配置
+{{ else if .is_container }}
+# 容器特定配置
+{{ else }}
+# 其他 Linux 特定配置
+{{ end }}
+```
+
+这些变量比直接使用 chezmoi 内置变量更加清晰和简洁，例如使用 `.is_wsl` 而不是：
+
+```
+{{ if and (eq .chezmoi.os "linux") (contains "microsoft" .chezmoi.kernel.osrelease) }}
+```
 
 例如，Git 配置通过 `symlink_dot_gitconfig.tmpl` 根据不同操作系统链接到相应的配置文件，包括 Windows、Linux 和 WSL 特定配置。
 
@@ -210,6 +257,14 @@ op --version
 - 在 `.bashrc` 和 `.zshrc` 中集成 Atuin
 - 在 Windows 环境中忽略 Atuin 私钥文件
 
+### Bash Line Editor (ble.sh)
+
+[ble.sh](https://github.com/akinomyoga/ble.sh) 是一个增强 Bash 命令行编辑器：
+
+- 自动安装到 `~/.local/share/blesh`
+- 在 `.bashrc` 中集成
+- 提供语法高亮、智能补全和其他增强功能
+
 ## 故障排除
 
 ### 模板变量问题
@@ -243,6 +298,8 @@ chezmoi merge ~/.bashrc
 - 通过 Scoop 安装常用软件包
 - PowerShell 配置文件和别名
 - Windows Terminal 配置
+- PowerShell DirColors 模块（提供类 Unix 的文件颜色显示）
+- Starship 终端提示符集成
 
 ### Linux 特定功能
 

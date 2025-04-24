@@ -46,7 +46,10 @@ function Get-TimeStamp {
 }
 
 # 添加到 PATH
-# $env:Path += ";C:\Users\zhiyue\bin"
+# 添加 chezmoi 到 PATH（如果存在）
+# $env:Path += ";$env:USERPROFILE\.local\bin"
+# 添加其他自定义路径
+# $env:Path += ";$env:USERPROFILE\bin"
 
 # 设置代理（如需要）
 # $env:http_proxy = "http://127.0.0.1:7890"
@@ -60,7 +63,7 @@ if (Get-Command starship -ErrorAction SilentlyContinue) {
     Invoke-Expression (&starship init powershell)
 }
 
-
+# 导入 PSReadLine 模块
 Import-Module PSReadLine
 
 # 使用上下箭头搜索历史时匹配已输入的文本
