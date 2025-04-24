@@ -42,3 +42,15 @@ scoop install posh-git
 
 winget install starship
 scoop install age
+
+# 安装 PowerShell 模块
+Write-Output "Installing PowerShell modules..."
+
+# 检查 DirColors 模块是否已安装
+if (!(Get-Module -ListAvailable -Name DirColors)) {
+    Write-Output "Installing DirColors module..."
+    Install-Module -Name DirColors -Scope CurrentUser -Force
+    Write-Output "DirColors module installed successfully!"
+} else {
+    Write-Output "DirColors module is already installed."
+}

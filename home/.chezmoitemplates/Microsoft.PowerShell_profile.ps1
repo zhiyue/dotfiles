@@ -22,6 +22,11 @@ function which($command) {
 # Import-Module oh-my-posh
 # Set-PoshPrompt -Theme paradox
 
+# 导入 DirColors 模块（如果已安装）
+if (Get-Module -ListAvailable -Name DirColors) {
+    Import-Module DirColors
+}
+
 # 设置编码为 UTF-8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
