@@ -6,14 +6,15 @@
 
 ```
 .
-├── .chezmoiexternal.toml  # 外部依赖配置
-├── .chezmoiignore         # 忽略文件配置
 ├── .chezmoiroot           # 指定源目录为 home
 ├── README.md              # 本文档
 ├── install.sh             # 容器环境安装脚本
 └── home/                  # 主要配置文件目录
     ├── .chezmoi.toml.tmpl            # chezmoi 配置模板
+    ├── .chezmoiexternal.toml         # 外部依赖配置
+    ├── .chezmoiignore                # 忽略文件配置
     ├── .chezmoiscripts/              # 自动化脚本目录
+    │   ├── container/                 # 容器环境脚本
     │   ├── linux/                    # Linux 特定脚本
     │   │   ├── run_once_before_000_install_1password_cli.sh.tmpl  # 1Password CLI 安装
     │   │   ├── run_once_before_fetch_age_key.sh.tmpl             # 获取 age 密钥
@@ -33,17 +34,31 @@
     │   ├── dot_gitconfig.windows     # Windows 的 Git 配置模板
     │   ├── dot_gitconfig.wsl         # WSL 的 Git 配置模板
     │   ├── dot_ssh_config.linux      # Linux 的 SSH 配置模板
-    │   └── dot_ssh_config.wsl        # WSL 的 SSH 配置模板
+    │   ├── dot_ssh_config.windows    # Windows 的 SSH 配置模板
+    │   ├── dot_ssh_config.wsl        # WSL 的 SSH 配置模板
+    │   └── windows_terminal_settings.json  # Windows Terminal 配置模板
     ├── AppData/                      # Windows 应用数据目录
+    │   └── Local/                    # 本地应用数据
+    │       └── Packages/               # 应用包数据
     ├── Documents/                    # 文档目录
-    │   └── WindowsPowerShell/        # PowerShell 配置
-    │       └── Microsoft.PowerShell_profile.ps1  # PowerShell 配置文件
-    ├── dot_config/                   # .config 目录（Linux/macOS/WSL）
-    │   └── starship.toml             # Starship 终端提示符配置
-    ├── dot_local/                    # .local 目录（Linux/WSL）
-    ├── dot_ssh/                      # SSH 配置目录
+    │   ├── PowerShell/               # PowerShell Core 配置
+    │   │   └── symlink_Microsoft.PowerShell_profile.ps1.tmpl  # PowerShell Core 配置文件链接
+    │   └── WindowsPowerShell/        # Windows PowerShell 配置
+    │       └── symlink_Microsoft.PowerShell_profile.ps1.tmpl  # Windows PowerShell 配置文件链接
     ├── dot_bashrc                    # Bash 配置文件
+    ├── dot_config/                   # .config 目录（Linux/macOS/WSL）
+    │   ├── atuin/                    # Atuin 配置目录
+    │   │   └── private_config.toml    # Atuin 私有配置文件
+    │   ├── scoop/                    # Scoop 配置目录
+    │   │   └── modify_config.json     # Scoop 配置文件
+    │   └── starship.toml             # Starship 终端提示符配置
     ├── dot_gitignore_global          # 全局 Git 忽略文件
+    ├── dot_local/                    # .local 目录（Linux/WSL）
+    │   └── share/                    # 共享数据目录
+    │       └── private_atuin/          # Atuin 私有数据目录
+    ├── dot_ssh/                      # SSH 配置目录
+    │   └── symlink_config.tmpl       # SSH 配置文件链接
+    ├── dot_wslconfig                 # WSL 全局配置文件
     ├── dot_zshrc                     # Zsh 配置文件
     └── symlink_dot_gitconfig.tmpl    # Git 配置符号链接模板
 ```
