@@ -59,3 +59,19 @@ Write-Host "Current time: $(Get-TimeStamp)" -ForegroundColor Yellow
 if (Get-Command starship -ErrorAction SilentlyContinue) {
     Invoke-Expression (&starship init powershell)
 }
+
+
+Import-Module PSReadLine
+
+# 使用上下箭头搜索历史时匹配已输入的文本
+Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
+Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
+
+# 启用基于历史的预测
+Set-PSReadLineOption -PredictionSource History
+
+# 切换预测视图样式（ListView 或 InlineView）
+Set-PSReadLineOption -PredictionViewStyle ListView
+
+# 设置 Tab 自动补全
+Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete

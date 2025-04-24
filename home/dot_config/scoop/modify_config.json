@@ -1,0 +1,8 @@
+// chezmoi:modify-template
+// chezmoi:template:line-endings=crlf
+// reference: https://github.com/twpayne/chezmoi/discussions/2824#discussioncomment-5272238
+
+{{- .chezmoi.stdin | fromJson |
+    setValueAtPath "aria2-enabled" true |
+    setValueAtPath "aria2-warning-enabled" false |
+    toPrettyJson -}}
