@@ -9,6 +9,8 @@
 ├── .chezmoiroot           # 指定源目录为 home
 ├── README.md              # 本文档
 ├── install.sh             # 容器环境安装脚本
+├── scripts/               # 实用工具脚本目录
+│   └── Decrypt-ChezmoiHistory.ps1  # 解密历史版本加密文件的脚本
 └── home/                  # 主要配置文件目录
     ├── .chezmoi.toml.tmpl            # chezmoi 配置模板
     ├── .chezmoiexternal.toml         # 外部依赖配置
@@ -52,6 +54,8 @@
     │   ├── scoop/                    # Scoop 配置目录
     │   │   └── modify_config.json     # Scoop 配置文件
     │   └── starship.toml             # Starship 终端提示符配置
+    ├── dot_cursor/                   # 鼠标指针配置目录
+    │   └── encrypted_mcp.json.age    # 加密的鼠标指针配置文件
     ├── dot_gitignore_global          # 全局 Git 忽略文件
     ├── dot_local/                    # .local 目录（Linux/WSL）
     │   └── share/                    # 共享数据目录
@@ -243,6 +247,7 @@ chezmoi diff
 - `.chezmoi.toml.tmpl` 中配置了 age 加密
 - 敏感文件使用 `.age` 后缀，会自动加密/解密
 - 密钥通过 `run_once_before_fetch_age_key` 脚本获取
+- 使用 `scripts/Decrypt-ChezmoiHistory.ps1` 脚本可以解密历史版本中的加密文件
 
 ### 1Password 集成
 
@@ -279,6 +284,44 @@ op --version
 - 自动安装到 `~/.local/share/blesh`
 - 在 `.bashrc` 中集成
 - 提供语法高亮、智能补全和其他增强功能
+
+### 鼠标指针配置
+
+本仓库包含了 Windows 系统的鼠标指针配置：
+
+- 存储在 `dot_cursor` 目录中
+- 使用 age 加密保护配置文件
+- 应用后会设置自定义鼠标指针样式
+
+## 实用工具脚本
+
+`scripts` 目录包含了一些实用的辅助脚本：
+
+### Decrypt-ChezmoiHistory.ps1
+
+这个 PowerShell 脚本用于解密 Git 历史版本中的加密文件，特别适用于需要查看或恢复之前版本的加密配置时使用。
+
+**用法**：
+
+```powershell
+# 基本用法（会自动查找加密文件并尝试解密）
+.\scripts\Decrypt-ChezmoiHistory.ps1 -Commit <提交ID>
+
+# 指定文件路径
+.\scripts\Decrypt-ChezmoiHistory.ps1 -Commit <提交ID> -FilePath <文件路径>
+
+# 使用密码模式解密
+.\scripts\Decrypt-ChezmoiHistory.ps1 -Commit <提交ID> -UsePassphrase
+
+# 指定 age 密钥文件
+.\scripts\Decrypt-ChezmoiHistory.ps1 -Commit <提交ID> -AgeKeyFile <密钥文件路径>
+```
+
+**功能**：
+- 自动查找提交中的加密文件
+- 支持多种路径格式（源路径、目标路径）
+- 自动尝试使用默认密钥或密码解密
+- 提供详细的解密过程信息
 
 ## 故障排除
 
